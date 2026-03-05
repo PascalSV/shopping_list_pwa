@@ -56,6 +56,13 @@ app.get('/lists', async (c) => {
 app.get('/list/create', async (c) => {
     try {
         const lists = await db.getAllLists(c.env.DB);
+        const isHtmx = c.req.header('HX-Request') === 'true';
+
+        if (isHtmx) {
+            // For HTMX requests, return just the form without Layout
+            return c.html(CreateListForm());
+        }
+
         return c.html(
             Layout({
                 title: 'Create List',
@@ -108,6 +115,7 @@ app.get('/list/:listId/edit', async (c) => {
         const listId = c.req.param('listId');
         const lists = await db.getAllLists(c.env.DB);
         const list = lists.find(l => l.id === listId);
+        const isHtmx = c.req.header('HX-Request') === 'true';
 
         if (!list) {
             // If list doesn't exist, switch to first available list or home
@@ -115,6 +123,14 @@ app.get('/list/:listId/edit', async (c) => {
                 return c.redirect(`/list/${lists[0].id}`, 302);
             }
             return c.redirect('/', 302);
+        }
+
+        if (isHtmx) {
+            // For HTMX requests, return just the form without Layout
+            return c.html(EditListForm({
+                listId,
+                listName: list.name
+            }));
         }
 
         return c.html(
@@ -138,6 +154,7 @@ app.get('/item/:itemId/edit', async (c) => {
     try {
         const itemId = c.req.param('itemId');
         const listId = c.req.query('listId');
+        const isHtmx = c.req.header('HX-Request') === 'true';
 
         if (!listId) {
             return c.text('List ID required', 400);
@@ -148,6 +165,16 @@ app.get('/item/:itemId/edit', async (c) => {
 
         if (!item) {
             return c.text('Item not found', 404);
+        }
+
+        if (isHtmx) {
+            // For HTMX requests, return just the form without Layout
+            return c.html(EditItemForm({
+                itemId,
+                listId,
+                name: item.name,
+                remark: item.remark
+            }));
         }
 
         return c.html(

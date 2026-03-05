@@ -50,6 +50,15 @@ itemsRoutes.post('/lists/:listId/items', async (c) => {
             return c.json({ error: 'Name is required' }, 400);
         }
 
+        // Check if item with same name already exists in this list
+        const existingItems = await db.getListItems(c.env.DB, listId);
+        const nameLower = name.toLowerCase().trim();
+        const duplicate = existingItems.find(item => item.name.toLowerCase().trim() === nameLower);
+
+        if (duplicate) {
+            return c.json({ error: 'Item already exists in this list' }, 409);
+        }
+
         const item = await db.createItem(
             c.env.DB,
             listId,

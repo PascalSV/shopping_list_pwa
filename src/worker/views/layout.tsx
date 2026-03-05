@@ -99,6 +99,24 @@ export const Layout = (props: {
             background: radial-gradient(circle at 45% 50%, rgba(95, 188, 255, 0.3) 0%, rgba(95, 188, 255, 0) 70%);
         }
 
+        /* Blurry status bar for iOS PWAs */
+        @supports (padding: env(safe-area-inset-top)) {
+            body::before {
+                width: 100%;
+                height: env(safe-area-inset-top);
+                top: 0;
+                left: 0;
+                right: 0;
+                background: transparent;
+                border-radius: 0;
+                filter: none;
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                mask: linear-gradient(to bottom, black, black 50%, rgba(0, 0, 0, 0.7) 75%, rgba(0, 0, 0, 0) 100%);
+                z-index: 2;
+            }
+        }
+
         .container {
             max-width: 720px;
             margin: 0 auto;
@@ -757,31 +775,7 @@ export const Layout = (props: {
             backdrop-filter: blur(4px);
             -webkit-backdrop-filter: blur(4px);
             z-index: 200;
-        }
-
-        .form-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
-            z-index: -1;
-        }
-
-        .form-container > form,
-        .form-container > div:not(::before):not(::after) {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.55) 0%, rgba(232, 243, 255, 0.45) 100%);
-            padding: 2rem;
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-xl);
-            border: 1px solid var(--border-strong);
-            backdrop-filter: blur(24px) saturate(180%);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            max-width: 480px;
-            width: 90%;
-            z-index: 201;
+            pointer-events: auto;
         }
 
         .form-container > form {
@@ -795,6 +789,7 @@ export const Layout = (props: {
             max-width: 480px;
             width: 90%;
             z-index: 201;
+            pointer-events: auto;
         }
 
         .form-container h2 {
@@ -1353,9 +1348,14 @@ export const Layout = (props: {
 
             let longPressTimer;
             let isLongPress = false;
+            let touchStartX = 0;
+            let touchStartY = 0;
 
-            const handleMouseDown = () => {
+            const handleMouseDown = (e) => {
                 isLongPress = false;
+                touchStartX = e.clientX || e.touches?.[0]?.clientX || 0;
+                touchStartY = e.clientY || e.touches?.[0]?.clientY || 0;
+                
                 longPressTimer = setTimeout(() => {
                     isLongPress = true;
                     const itemId = item.dataset.itemId;
@@ -1363,9 +1363,22 @@ export const Layout = (props: {
                     const editUrl = '/item/' + itemId + '/edit?listId=' + listId;
                     htmx.ajax('GET', editUrl, {
                         target: 'body',
-                        swap: 'innerHTML'
+                        swap: 'beforeend'
                     });
                 }, 500);
+            };
+
+            const handleMove = (e) => {
+                // Cancel long-press if movement exceeds threshold (10px)
+                const currentX = e.clientX || e.touches?.[0]?.clientX || 0;
+                const currentY = e.clientY || e.touches?.[0]?.clientY || 0;
+                const distance = Math.sqrt(
+                    Math.pow(currentX - touchStartX, 2) + Math.pow(currentY - touchStartY, 2)
+                );
+                
+                if (distance > 10) {
+                    clearTimeout(longPressTimer);
+                }
             };
 
             const handleMouseUp = () => {
@@ -1400,9 +1413,11 @@ export const Layout = (props: {
             };
 
             item.addEventListener('mousedown', handleMouseDown);
+            item.addEventListener('mousemove', handleMove);
             item.addEventListener('mouseup', handleMouseUp);
             item.addEventListener('mouseleave', () => clearTimeout(longPressTimer));
             item.addEventListener('touchstart', handleMouseDown);
+            item.addEventListener('touchmove', handleMove);
             item.addEventListener('touchend', handleMouseUp);
         };
 
@@ -1534,6 +1549,36 @@ export const Layout = (props: {
                 setTimeout(updateEmptyState, 120);
             }
         });
+
+        htmx.on('htmx:responseError', (event) => {
+            const xhr = event.detail.xhr;
+            
+            // Handle duplicate item error
+            if (xhr.status === 409) {
+                let message = 'Item already exists in this list';
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.error) {
+                        message = response.error;
+                    }
+                } catch (e) {
+                    // Use default message
+                }
+                showNotification(message, 'error');
+                
+                // Prevent HTMX from swapping
+                event.detail.shouldSwap = false;
+            }
+        });
+
+        // Close modal when clicking on backdrop (outside the form)
+        document.addEventListener('click', (event) => {
+            const formContainer = event.target.closest('.form-container');
+            if (formContainer && event.target === formContainer) {
+                // User clicked on the backdrop, navigate back
+                window.history.back();
+            }
+        }, true);
     </script>
 </body>
 </html>`;

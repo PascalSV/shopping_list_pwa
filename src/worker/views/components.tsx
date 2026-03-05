@@ -46,7 +46,7 @@ export const ListsManagementView = (props: {
                 class="btn btn-primary"
                 hx-get="/list/create"
                 hx-target="body"
-                hx-swap="innerHTML"
+                hx-swap="beforeend"
             >
                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -65,7 +65,7 @@ export const ListsManagementView = (props: {
                     class="btn btn-primary"
                     hx-get="/list/create"
                     hx-target="body"
-                    hx-swap="innerHTML"
+                    hx-swap="beforeend"
                 >
                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -100,7 +100,7 @@ export const CreateListForm = () => html`
         <form 
             hx-post="/api/lists"
             hx-swap="none"
-            hx-on::after-settle="if(event.detail.xhr.status === 201) { const list = JSON.parse(event.detail.xhr.responseText); window.location.href = '/list/' + list.id; }"
+            hx-on::after-settle="if(event.detail.xhr.status === 201) { document.querySelector('.form-container')?.remove(); const list = JSON.parse(event.detail.xhr.responseText); window.location.href = '/list/' + list.id; }"
         >
             <h2>Create New List</h2>
             <div class="form-group">
@@ -134,7 +134,7 @@ export const EditListForm = (props: {
         <form 
             hx-put="/api/lists/${props.listId}"
             hx-swap="none"
-            hx-on::after-settle="if(event.detail.xhr.status === 200) window.location.href = '/list/${props.listId}'"
+            hx-on::after-settle="if(event.detail.xhr.status === 200) { document.querySelector('.form-container')?.remove(); window.location.href = '/list/${props.listId}'; }"
         >
             <h2>Edit List</h2>
             <div class="form-group">
@@ -187,7 +187,7 @@ export const EditItemForm = (props: {
         <form 
             hx-patch="/api/lists/${props.listId}/items/${props.itemId}"
             hx-swap="none"
-            hx-on::after-settle="if(event.detail.xhr.status === 200) window.location.href = '/list/${props.listId}'"
+            hx-on::after-settle="if(event.detail.xhr.status === 200) { document.querySelector('.form-container')?.remove(); window.location.href = '/list/${props.listId}'; }"
         >
             <h2>Edit Item</h2>
             <div class="form-group">
