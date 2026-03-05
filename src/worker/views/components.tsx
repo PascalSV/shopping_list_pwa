@@ -5,7 +5,7 @@ export const ListItemRow = (item: ShoppingItem, listId: string) => html`
     <div class="item ${item.completed ? 'completed' : ''}" data-item-id="${item.id}" data-list-id="${listId}" data-item-name="${item.name}">
         <div class="item-content">
             <span class="item-name">${item.name}</span>
-            ${item.remark ? html`<span class="item-remark">${item.remark}</span>` : html`<span class="item-remark item-remark-empty"></span>`}
+            ${item.remark ? html`<span class="item-remark">${item.remark}</span>` : ''}
         </div>
     </div>
 `;
@@ -16,25 +16,20 @@ export const ListView = (props: {
     items: ShoppingItem[];
 }) => html`
     <div class="list-view">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; gap: 1rem;">
+        <div style="display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 1.5rem; gap: 0.75rem;">
             <button 
                 class="btn btn-secondary"
                 hx-get="/lists"
                 hx-target="body"
                 hx-swap="innerHTML"
-                style="flex: 0 0 auto;"
+                style="padding: 0.35rem 0.75rem; font-size: 0.8rem; min-height: 28px;"
             >
-                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 0.25rem;">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
-                Lists
+                My lists
             </button>
-            <h2 id="current-list-title" data-list-id="${props.listId}" style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); flex: 1;">${props.listName}</h2>
+            <h2 id="current-list-title" data-list-id="${props.listId}" style="font-size: 1.75rem; font-weight: 700; color: var(--text-primary);">${props.listName}</h2>
         </div>
 
-        <div class="empty-state" id="empty-state" style="${props.items.length === 0 ? '' : 'display: none;'}">
-            <div>You have no more items to shop - well done!</div>
-        </div>
+        ${props.items.length === 0 ? html`<div id="empty-message" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1rem; color: var(--text-secondary); text-align: center;">You have no more items to shop - well done!</div>` : ''}
 
         <div id="items-list" class="items-list">
             ${props.items.map(item => ListItemRow(item, props.listId))}
@@ -102,12 +97,12 @@ export const ListsManagementView = (props: {
 
 export const CreateListForm = () => html`
     <div class="form-container">
-        <h2>📝 Create New List</h2>
         <form 
             hx-post="/api/lists"
             hx-swap="none"
             hx-on::after-settle="if(event.detail.xhr.status === 201) { const list = JSON.parse(event.detail.xhr.responseText); window.location.href = '/list/' + list.id; }"
         >
+            <h2>Create New List</h2>
             <div class="form-group">
                 <label for="listName">List Name</label>
                 <input 
@@ -121,9 +116,6 @@ export const CreateListForm = () => html`
             </div>
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary" style="flex: 1.5;">
-                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
                     Create List
                 </button>
                 <button type="button" class="btn btn-secondary" hx-get="/lists" hx-target="body" hx-swap="innerHTML">
@@ -139,12 +131,12 @@ export const EditListForm = (props: {
     listName: string;
 }) => html`
     <div class="form-container">
-        <h2>✏️ Edit List</h2>
         <form 
             hx-put="/api/lists/${props.listId}"
             hx-swap="none"
             hx-on::after-settle="if(event.detail.xhr.status === 200) window.location.href = '/list/${props.listId}'"
         >
+            <h2>Edit List</h2>
             <div class="form-group">
                 <label for="listName">List Name</label>
                 <input 
@@ -158,9 +150,6 @@ export const EditListForm = (props: {
             </div>
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">
-                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
                     Update
                 </button>
                 <button 
@@ -171,9 +160,6 @@ export const EditListForm = (props: {
                     hx-confirm="Permanently delete this list? This cannot be undone."
                     hx-on::after-settle="window.location.href = '/lists'"
                 >
-                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
                     Delete
                 </button>
             </div>
@@ -198,12 +184,12 @@ export const EditItemForm = (props: {
     remark: string | null;
 }) => html`
     <div class="form-container">
-        <h2>✏️ Edit Item</h2>
         <form 
             hx-patch="/api/lists/${props.listId}/items/${props.itemId}"
             hx-swap="none"
             hx-on::after-settle="if(event.detail.xhr.status === 200) window.location.href = '/list/${props.listId}'"
         >
+            <h2>Edit Item</h2>
             <div class="form-group">
                 <label for="itemName">Item Name</label>
                 <input 
@@ -227,9 +213,6 @@ export const EditItemForm = (props: {
             </div>
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">
-                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
                     Update
                 </button>
                 <button 

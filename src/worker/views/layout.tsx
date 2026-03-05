@@ -12,7 +12,7 @@ export const Layout = (props: {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#10b981" />
+    <meta name="theme-color" content="#0a84ff" />
     <meta name="description" content="Offline-first shopping list PWA" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -24,28 +24,32 @@ export const Layout = (props: {
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --primary-light: #818cf8;
-            --secondary: #8b5cf6;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --success: #10b981;
-            --bg-primary: #ffffff;
-            --bg-secondary: #fafbfc;
-            --bg-tertiary: #f3f4f6;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --text-tertiary: #94a3b8;
-            --border: #e2e8f0;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --primary: #0a84ff;
+            --primary-dark: #0068d8;
+            --primary-light: #5ac8fa;
+            --secondary: #64d2ff;
+            --danger: #ff453a;
+            --warning: #ff9f0a;
+            --success: #32d74b;
+            --bg-primary: rgba(255, 255, 255, 0.56);
+            --bg-secondary: rgba(246, 250, 255, 0.52);
+            --bg-tertiary: rgba(226, 236, 248, 0.58);
+            --bg-page-top: #c9dcff;
+            --bg-page-bottom: #f1f7ff;
+            --text-primary: #102340;
+            --text-secondary: #2a4668;
+            --text-tertiary: #5f7a9a;
+            --border: rgba(255, 255, 255, 0.62);
+            --border-strong: rgba(255, 255, 255, 0.78);
+            --shadow-sm: 0 8px 18px rgba(10, 33, 63, 0.09);
+            --shadow-md: 0 14px 30px rgba(10, 33, 63, 0.14);
+            --shadow-lg: 0 24px 48px rgba(10, 33, 63, 0.17);
+            --shadow-xl: 0 38px 72px rgba(10, 33, 63, 0.2);
             --radius-sm: 0.375rem;
             --radius-md: 0.5rem;
             --radius-lg: 0.75rem;
             --radius-xl: 1rem;
+            --glass-blur: blur(24px) saturate(170%);
         }
 
         * {
@@ -55,30 +59,84 @@ export const Layout = (props: {
         }
 
         body {
-            font-family: 'D-DIN', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #f0f4ff 0%, #f5f0ff 100%);
+            font-family: 'SF Pro Display', 'D-DIN', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background:
+                radial-gradient(140% 90% at 12% 8%, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 60%),
+                radial-gradient(120% 80% at 88% 0%, rgba(99, 181, 255, 0.35) 0%, rgba(99, 181, 255, 0) 62%),
+                linear-gradient(172deg, var(--bg-page-top) 0%, var(--bg-page-bottom) 50%, #eaf3ff 100%);
             color: var(--text-primary);
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 999px;
+            pointer-events: none;
+            filter: blur(2px);
+            z-index: 0;
+        }
+
+        body::before {
+            width: 360px;
+            height: 360px;
+            top: -120px;
+            left: -80px;
+            background: radial-gradient(circle at 40% 35%, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 72%);
+        }
+
+        body::after {
+            width: 420px;
+            height: 420px;
+            right: -160px;
+            bottom: -130px;
+            background: radial-gradient(circle at 45% 50%, rgba(95, 188, 255, 0.3) 0%, rgba(95, 188, 255, 0) 70%);
         }
 
         .container {
-            max-width: 680px;
+            max-width: 720px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            background: var(--bg-secondary);
+            background: linear-gradient(140deg, rgba(255, 255, 255, 0.42) 0%, rgba(232, 243, 255, 0.4) 100%);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-left: 1px solid var(--border-strong);
+            border-right: 1px solid var(--border-strong);
             box-shadow: var(--shadow-xl);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.82) 50%, rgba(255, 255, 255, 0) 100%);
+            z-index: 2;
+            pointer-events: none;
         }
 
         /* Header Styles */
         .header {
             background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
             color: var(--text-primary);
-            padding: 1.25rem 1.5rem;
+            padding: 0.5rem 1.5rem;
             box-shadow: none;
+            border-bottom: none;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -104,30 +162,32 @@ export const Layout = (props: {
         .logo {
             width: 36px;
             height: 36px;
-            border-radius: var(--radius-lg);
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: transparent;
+            background: linear-gradient(135deg, rgba(10, 132, 255, 0.18) 0%, rgba(90, 200, 250, 0.14) 100%);
+            border: none;
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4), 0 8px 14px rgba(13, 33, 54, 0.1);
             padding: 0;
         }
 
         .logo img {
-            width: 100%;
-            height: 100%;
-            border-radius: var(--radius-lg);
+            width: 24px;
+            height: 24px;
+            border-radius: 0;
             display: block;
         }
 
         .btn {
             font-family: 'D-DIN', sans-serif;
             padding: 0.45rem 0.85rem;
-            border: none;
+            border: 1px solid var(--border-strong);
             border-radius: var(--radius-lg);
             cursor: pointer;
             font-weight: 600;
             font-size: 0.85rem;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
@@ -135,16 +195,32 @@ export const Layout = (props: {
             white-space: nowrap;
             line-height: 1;
             min-height: 34px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), var(--shadow-sm);
+            backdrop-filter: blur(14px) saturate(150%);
+            -webkit-backdrop-filter: blur(14px) saturate(150%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 46%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.52) 0%, rgba(255, 255, 255, 0) 100%);
+            pointer-events: none;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.82) 0%, rgba(139, 92, 246, 0.82) 100%);
+            background: linear-gradient(135deg, rgba(10, 132, 255, 0.82) 0%, rgba(90, 200, 250, 0.72) 100%);
             color: white;
-            box-shadow: var(--shadow-sm);
+            border-color: rgba(255, 255, 255, 0.6);
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.9) 0%, rgba(124, 58, 237, 0.9) 100%);
+            background: linear-gradient(135deg, rgba(0, 104, 216, 0.92) 0%, rgba(10, 132, 255, 0.84) 100%);
             transform: translateY(-1px);
             box-shadow: var(--shadow-md);
         }
@@ -154,26 +230,25 @@ export const Layout = (props: {
         }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.42);
             color: var(--text-primary);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-strong);
         }
 
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.62);
             transform: translateY(-1px);
             box-shadow: var(--shadow-md);
         }
 
         .btn-danger {
-            background: rgba(239, 68, 68, 0.82);
+            background: linear-gradient(135deg, rgba(255, 105, 97, 0.85) 0%, rgba(255, 69, 58, 0.82) 100%);
             color: white;
-            box-shadow: var(--shadow-sm);
+            border-color: rgba(255, 255, 255, 0.58);
         }
 
         .btn-danger:hover {
-            background: rgba(220, 38, 38, 0.9);
+            background: linear-gradient(135deg, rgba(255, 69, 58, 0.94) 0%, rgba(209, 48, 39, 0.9) 100%);
             transform: translateY(-1px);
             box-shadow: var(--shadow-md);
         }
@@ -196,7 +271,7 @@ export const Layout = (props: {
             overflow-y: auto;
             padding: 1.5rem;
             padding-bottom: 140px;
-            background: var(--bg-secondary);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(233, 244, 255, 0.08) 100%);
         }
 
         /* Footer Styles */
@@ -205,13 +280,15 @@ export const Layout = (props: {
             bottom: 0;
             left: 0;
             right: 0;
-            max-width: 680px;
+            max-width: 720px;
             margin: 0 auto;
             width: 100%;
             padding: 1rem;
-            background: var(--bg-primary);
-            border-top: 1px solid var(--border);
-            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            border-top: none;
+            box-shadow: none;
             z-index: 50;
         }
 
@@ -222,42 +299,52 @@ export const Layout = (props: {
             gap: 0.75rem;
         }
 
+        /* List View */
+        .list-view {
+            position: relative;
+            min-height: 50vh;
+        }
+
         .item {
             display: flex;
-            gap: 1rem;
-            padding: 1.25rem;
-            background: var(--bg-primary);
+            gap: 0.75rem;
+            padding: 1rem 1rem;
+            background: linear-gradient(140deg, rgba(255, 255, 255, 0.54) 0%, rgba(233, 244, 255, 0.44) 100%);
             border-radius: var(--radius-xl);
             align-items: flex-start;
             box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-strong);
+            backdrop-filter: blur(16px) saturate(150%);
+            -webkit-backdrop-filter: blur(16px) saturate(150%);
             transition: all 0.2s ease;
             position: relative;
             cursor: pointer;
+            height: 4.75rem;
         }
 
         .item-content {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            align-items: flex-start;
+            gap: 0.3rem;
             width: 100%;
         }
 
         .item:hover {
             box-shadow: var(--shadow-md);
             transform: translateY(-2px);
-            border-color: var(--primary);
+            border-color: rgba(113, 186, 255, 0.95);
         }
 
         .item.completed {
-            background: var(--bg-tertiary);
-            opacity: 0.8;
+            background: linear-gradient(140deg, rgba(231, 238, 247, 0.54) 0%, rgba(223, 234, 246, 0.58) 100%);
+            opacity: 0.82;
         }
 
         .item-name {
-            flex: 1;
+            flex: 0 0 auto;
             font-family: 'D-DIN Condensed', sans-serif;
-            font-size: 1.125rem;
+            font-size: 1rem;
             font-weight: 600;
             color: var(--text-primary);
         }
@@ -266,22 +353,27 @@ export const Layout = (props: {
             font-size: 0.875rem;
             color: var(--text-secondary);
             display: block;
-            min-height: 1.25rem;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .item-remark-empty {
-            visibility: hidden;
+            display: none;
         }
 
         /* Forms */
         .add-item-form {
             display: flex;
             gap: 0.75rem;
-            background: var(--bg-primary);
+            background: linear-gradient(140deg, rgba(255, 255, 255, 0.5) 0%, rgba(229, 241, 255, 0.46) 100%);
             padding: 1.25rem;
             border-radius: var(--radius-xl);
             box-shadow: var(--shadow-md);
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-strong);
+            backdrop-filter: blur(20px) saturate(170%);
+            -webkit-backdrop-filter: blur(20px) saturate(170%);
             flex-wrap: wrap;
             flex: none;
         }
@@ -290,20 +382,22 @@ export const Layout = (props: {
             flex: 1;
             min-width: 200px;
             padding: 0.875rem 1.125rem;
-            border: 2px solid var(--border);
+            border: 1px solid rgba(255, 255, 255, 0.7);
             border-radius: var(--radius-lg);
             font-size: 1rem;
             font-family: inherit;
             transition: all 0.2s ease;
-            background: var(--bg-secondary);
+            background: rgba(255, 255, 255, 0.36);
             color: var(--text-primary);
+            backdrop-filter: blur(10px) saturate(145%);
+            -webkit-backdrop-filter: blur(10px) saturate(145%);
         }
 
         .add-item-form input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-            background: white;
+            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.18);
+            background: rgba(255, 255, 255, 0.6);
         }
 
         .add-item-form input::placeholder {
@@ -320,30 +414,32 @@ export const Layout = (props: {
         .search-form {
             display: flex;
             gap: 0.5rem;
-            background: transparent;
-            padding: 0;
-            border: none;
-            box-shadow: none;
-            border-radius: 0;
+            background: rgba(255, 255, 255, 0.36);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-strong);
+            box-shadow: var(--shadow-sm);
+            padding: 0.45rem;
+            backdrop-filter: blur(18px) saturate(170%);
+            -webkit-backdrop-filter: blur(18px) saturate(170%);
         }
 
         .search-form input {
             flex: 1;
             min-width: 0;
             padding: 0.75rem 1rem;
-            border: 1px solid var(--border);
+            border: 1px solid rgba(255, 255, 255, 0.42);
             border-radius: var(--radius-lg);
             font-size: 1rem;
             font-family: inherit;
             transition: all 0.2s ease;
-            background: var(--bg-primary);
+            background: rgba(255, 255, 255, 0.2);
             color: var(--text-primary);
         }
 
         .search-form input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.14);
         }
 
         .search-form input::placeholder {
@@ -353,15 +449,19 @@ export const Layout = (props: {
         .suggestions-container {
             position: absolute;
             bottom: calc(100% + 0.35rem);
-            left: 1rem;
-            right: 1rem;
+            left: 0;
+            right: 0;
             display: flex;
             flex-wrap: wrap;
+            justify-content: center;
             gap: 0.5rem;
-            padding: 0;
+            padding: 0 0.5rem;
             background: transparent;
             border: none;
             box-shadow: none;
+            border-radius: 0;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
             max-height: 200px;
             overflow-y: auto;
             z-index: 60;
@@ -373,15 +473,16 @@ export const Layout = (props: {
 
         .suggestion-btn {
             padding: 0.5rem 1rem;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: linear-gradient(135deg, rgba(10, 132, 255, 0.88) 0%, rgba(90, 200, 250, 0.8) 100%);
             color: white;
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.7);
             border-radius: var(--radius-lg);
             font-size: 0.875rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
             white-space: nowrap;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.48), 0 10px 20px rgba(7, 46, 83, 0.16);
         }
 
         .suggestion-btn:hover {
@@ -398,21 +499,22 @@ export const Layout = (props: {
             width: 42px;
             height: 42px;
             border-radius: var(--radius-lg);
-            border: 1px solid var(--border);
-            background: var(--bg-primary);
+            border: 1px solid var(--border-strong);
+            background: rgba(255, 255, 255, 0.36);
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--text-secondary);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), var(--shadow-sm);
         }
 
         .btn-icon-clear:hover {
             border-color: var(--primary);
             color: var(--primary);
             transform: translateY(-1px);
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow-md);
         }
 
         .btn-icon-clear svg {
@@ -432,7 +534,9 @@ export const Layout = (props: {
             max-width: 360px;
             box-shadow: var(--shadow-xl);
             animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(18px) saturate(165%);
+            -webkit-backdrop-filter: blur(18px) saturate(165%);
+            border: 1px solid rgba(255, 255, 255, 0.42);
             z-index: 1000;
         }
 
@@ -463,8 +567,13 @@ export const Layout = (props: {
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
-            color: var(--text-tertiary);
+            color: var(--text-secondary);
             font-size: 1.125rem;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(16px) saturate(165%);
+            -webkit-backdrop-filter: blur(16px) saturate(165%);
         }
 
         .empty-state svg {
@@ -480,7 +589,7 @@ export const Layout = (props: {
             top: 1rem;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--warning);
+            background: rgba(255, 159, 10, 0.88);
             color: white;
             padding: 0.5rem 1rem;
             border-radius: var(--radius-md);
@@ -491,6 +600,9 @@ export const Layout = (props: {
             display: none;
             align-items: center;
             gap: 0.5rem;
+            border: 1px solid rgba(255, 224, 179, 0.65);
+            backdrop-filter: blur(10px) saturate(170%);
+            -webkit-backdrop-filter: blur(10px) saturate(170%);
         }
 
         .offline-badge.visible {
@@ -512,6 +624,48 @@ export const Layout = (props: {
         .item.optimistic-delete {
             opacity: 0.3;
             pointer-events: none;
+        }
+
+        .header,
+        .content,
+        .footer {
+            animation: glassFadeIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .item,
+        .list-row,
+        .form-container,
+        .add-item-form {
+            animation: glassRise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .item:nth-child(2), .list-row:nth-child(2) { animation-delay: 40ms; }
+        .item:nth-child(3), .list-row:nth-child(3) { animation-delay: 80ms; }
+        .item:nth-child(4), .list-row:nth-child(4) { animation-delay: 120ms; }
+        .item:nth-child(5), .list-row:nth-child(5) { animation-delay: 160ms; }
+
+        @keyframes glassFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes glassRise {
+            from {
+                opacity: 0;
+                transform: translateY(14px) scale(0.985);
+                filter: blur(2px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
         }
 
         /* HTMX Transitions */
@@ -579,15 +733,68 @@ export const Layout = (props: {
             }
         }
 
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
         /* Form Pages */
         .form-container {
-            max-width: 480px;
-            margin: 2rem auto;
-            background: var(--bg-primary);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 200;
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
+
+        .form-container > form,
+        .form-container > div:not(::before):not(::after) {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.55) 0%, rgba(232, 243, 255, 0.45) 100%);
             padding: 2rem;
             border-radius: var(--radius-xl);
             box-shadow: var(--shadow-xl);
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-strong);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            max-width: 480px;
+            width: 90%;
+            z-index: 201;
+        }
+
+        .form-container > form {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.55) 0%, rgba(232, 243, 255, 0.45) 100%);
+            padding: 2rem;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border-strong);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            max-width: 480px;
+            width: 90%;
+            z-index: 201;
         }
 
         .form-container h2 {
@@ -613,19 +820,21 @@ export const Layout = (props: {
         .form-group input {
             width: 100%;
             padding: 0.875rem 1.125rem;
-            border: 2px solid var(--border);
+            border: 1px solid rgba(255, 255, 255, 0.7);
             border-radius: var(--radius-lg);
             font-size: 1rem;
             font-family: inherit;
             transition: all 0.2s ease;
-            background: var(--bg-secondary);
+            background: rgba(255, 255, 255, 0.34);
+            backdrop-filter: blur(10px) saturate(150%);
+            -webkit-backdrop-filter: blur(10px) saturate(150%);
         }
 
         .form-group input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-            background: white;
+            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.17);
+            background: rgba(255, 255, 255, 0.62);
         }
 
         .form-actions {
@@ -652,8 +861,8 @@ export const Layout = (props: {
         }
 
         .list-row {
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
+            background: linear-gradient(140deg, rgba(255, 255, 255, 0.56) 0%, rgba(234, 245, 255, 0.44) 100%);
+            border: 1px solid var(--border-strong);
             border-radius: var(--radius-xl);
             padding: 1rem 1.1rem;
             box-shadow: var(--shadow-sm);
@@ -663,12 +872,14 @@ export const Layout = (props: {
             justify-content: space-between;
             cursor: pointer;
             user-select: none;
+            backdrop-filter: blur(16px) saturate(155%);
+            -webkit-backdrop-filter: blur(16px) saturate(155%);
         }
 
         .list-row:hover {
             box-shadow: var(--shadow-md);
             transform: translateY(-2px);
-            border-color: var(--primary);
+            border-color: rgba(113, 186, 255, 0.95);
         }
 
         .list-row-content {
@@ -690,6 +901,7 @@ export const Layout = (props: {
             font-size: 1.35rem;
             line-height: 1;
             margin-left: 0.75rem;
+            text-shadow: 0 6px 16px rgba(13, 53, 99, 0.18);
         }
 
         .btn-sm {
@@ -720,14 +932,6 @@ export const Layout = (props: {
         <span>Offline Mode</span>
     </div>
     <div class="container">
-        <div class="header">
-            <h1>
-                <span class="logo">
-                    <img src="/icons/icon-64.png" alt="ShopList" style="width: 24px; height: 24px;" />
-                </span>
-                ShopList
-            </h1>
-        </div>
 
         <div class="content" id="content">
             ${props.children}
@@ -1020,42 +1224,95 @@ export const Layout = (props: {
                         return;
                     }
 
-                    // Create signature from current items
+                    // Build maps for efficient lookup
                     const currentItems = Array.from(itemsList.querySelectorAll('.item'));
-                    const currentSignature = currentItems
-                        .map(item => item.getAttribute('data-item-id') + ':' + item.getAttribute('data-item-name') + ':' + (item.querySelector('.item-remark')?.textContent?.trim() || ''))
-                        .join('|');
+                    const currentItemsMap = new Map();
+                    currentItems.forEach(itemEl => {
+                        const id = itemEl.getAttribute('data-item-id');
+                        const name = itemEl.getAttribute('data-item-name');
+                        const remarkEl = itemEl.querySelector('.item-remark');
+                        const remark = remarkEl && remarkEl.textContent ? remarkEl.textContent.trim() : '';
+                        currentItemsMap.set(id, { element: itemEl, name, remark });
+                    });
 
-                    // Create signature from server items
-                    const serverSignature = items
-                        .map(item => item.id + ':' + item.name + ':' + (item.remark || ''))
-                        .join('|');
+                    const serverItemsMap = new Map();
+                    items.forEach(item => {
+                        serverItemsMap.set(item.id, { name: item.name, remark: item.remark || '' });
+                    });
 
-                    if (currentSignature === serverSignature) {
-                        return;
-                    }
+                    let hasChanges = false;
 
-                    // Fetch fresh HTML from server
-                    const htmlResponse = await fetch('/list/' + listId, { cache: 'no-store' });
-                    if (!htmlResponse.ok) {
-                        return;
-                    }
+                    // Remove deleted items
+                    currentItemsMap.forEach((data, id) => {
+                        if (!serverItemsMap.has(id)) {
+                            data.element.remove();
+                            hasChanges = true;
+                        }
+                    });
 
-                    const htmlText = await htmlResponse.text();
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(htmlText, 'text/html');
-                    const newItemsList = doc.getElementById('items-list');
-                    const newEmptyState = doc.getElementById('empty-state');
+                    // Add new items or update existing ones
+                    items.forEach((serverItem, index) => {
+                        const existing = currentItemsMap.get(serverItem.id);
+                        
+                        if (!existing) {
+                            // Item doesn't exist - add it
+                            let itemHtml = '<div class="item" data-item-id="' + serverItem.id + '" data-list-id="' + listId + '" data-item-name="' + serverItem.name + '">';
+                            itemHtml += '<div class="item-content">';
+                            itemHtml += '<span class="item-name">' + serverItem.name + '</span>';
+                            if (serverItem.remark) {
+                                itemHtml += '<span class="item-remark">' + serverItem.remark + '</span>';
+                            }
+                            itemHtml += '</div></div>';
+                            
+                            // Insert at correct position
+                            const currentItemAtPosition = itemsList.children[index];
+                            if (currentItemAtPosition) {
+                                currentItemAtPosition.insertAdjacentHTML('beforebegin', itemHtml);
+                            } else {
+                                itemsList.insertAdjacentHTML('beforeend', itemHtml);
+                            }
+                            hasChanges = true;
+                        } else if (existing.name !== serverItem.name || existing.remark !== (serverItem.remark || '')) {
+                            // Item exists but content changed - update it
+                            const nameEl = existing.element.querySelector('.item-name');
+                            if (nameEl) {
+                                nameEl.textContent = serverItem.name;
+                            }
+                            existing.element.setAttribute('data-item-name', serverItem.name);
+                            
+                            const remarkEl = existing.element.querySelector('.item-remark');
+                            if (serverItem.remark) {
+                                if (remarkEl) {
+                                    remarkEl.textContent = serverItem.remark;
+                                } else {
+                                    const contentEl = existing.element.querySelector('.item-content');
+                                    if (contentEl) {
+                                        contentEl.insertAdjacentHTML('beforeend', '<span class="item-remark">' + serverItem.remark + '</span>');
+                                    }
+                                }
+                            } else if (remarkEl) {
+                                remarkEl.remove();
+                            }
+                            hasChanges = true;
+                        }
+                    });
 
-                    if (newItemsList) {
-                        itemsList.innerHTML = newItemsList.innerHTML;
+                    // Re-initialize event listeners only for new/updated items
+                    if (hasChanges) {
                         initializeAllItems();
-                    }
-
-                    // Update empty state too
-                    const emptyState = document.getElementById('empty-state');
-                    if (emptyState && newEmptyState) {
-                        emptyState.style.display = newEmptyState.style.display;
+                        
+                        // Update empty message visibility
+                        const emptyMessage = document.getElementById('empty-message');
+                        if (items.length === 0) {
+                            if (!emptyMessage) {
+                                const listView = itemsList.closest('.list-view');
+                                if (listView) {
+                                    listView.insertAdjacentHTML('afterbegin', '<div id="empty-message" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1rem; color: var(--text-secondary); text-align: center;">You have no more items to shop - well done!</div>');
+                                }
+                            }
+                        } else if (emptyMessage) {
+                            emptyMessage.remove();
+                        }
                     }
                 } catch (err) {
                     console.error('Items refresh failed:', err);
@@ -1077,14 +1334,14 @@ export const Layout = (props: {
         };
 
         const updateEmptyState = () => {
-            const emptyState = document.getElementById('empty-state');
+            const emptyMessage = document.getElementById('empty-message');
             const itemsList = document.getElementById('items-list');
-            if (!emptyState || !itemsList) {
+            if (!emptyMessage || !itemsList) {
                 return;
             }
 
             const itemCount = itemsList.querySelectorAll('.item').length;
-            emptyState.style.display = itemCount === 0 ? 'block' : 'none';
+            emptyMessage.style.display = itemCount === 0 ? 'block' : 'none';
         };
 
         const initializeItemInteractions = (item) => {

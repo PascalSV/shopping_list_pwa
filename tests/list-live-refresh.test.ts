@@ -83,7 +83,7 @@ describe('List Name Live Refresh Markup', () => {
         const renameResponse = await worker.fetch('http://localhost/api/lists/' + created.id, {
             method: 'PUT',
             headers: deviceA.headers,
-            body: JSON.stringify({ name: 'Renamed Name' })
+            body: JSON.stringify({ name: 'Home' })
         });
         expect(renameResponse.status).toBe(200);
 
@@ -96,6 +96,6 @@ describe('List Name Live Refresh Markup', () => {
         const renamed = lists.find(list => list.id === created.id);
 
         expect(renamed).toBeDefined();
-        expect(renamed!.name).toBe('Renamed Name');
+        expect(renamed!.name).toBe('Home');
     });
 });
