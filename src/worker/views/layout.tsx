@@ -69,8 +69,10 @@ export const Layout = (props: {
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             min-height: 100vh;
+            height: 100dvh;
             position: relative;
             overflow-x: hidden;
+            overflow-y: hidden;
         }
 
         body::before,
@@ -123,6 +125,8 @@ export const Layout = (props: {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            height: 100dvh;
+            max-height: 100dvh;
             background: linear-gradient(140deg, rgba(255, 255, 255, 0.42) 0%, rgba(232, 243, 255, 0.4) 100%);
             backdrop-filter: var(--glass-blur);
             -webkit-backdrop-filter: var(--glass-blur);
@@ -286,9 +290,10 @@ export const Layout = (props: {
         /* Content Styles */
         .content {
             flex: 1;
+            min-height: 0;
             overflow-y: auto;
             padding: 1.5rem;
-            padding-bottom: 140px;
+            padding-bottom: calc(140px + env(safe-area-inset-bottom));
             background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(233, 244, 255, 0.08) 100%);
         }
 
@@ -302,6 +307,7 @@ export const Layout = (props: {
             margin: 0 auto;
             width: 100%;
             padding: 1rem;
+            padding-bottom: calc(1rem + env(safe-area-inset-bottom));
             background: transparent;
             backdrop-filter: none;
             -webkit-backdrop-filter: none;
@@ -310,11 +316,28 @@ export const Layout = (props: {
             z-index: 50;
         }
 
+        .footer:empty {
+            display: none;
+        }
+
+        .container.has-search .footer {
+            background: linear-gradient(
+                to bottom,
+                rgba(241, 247, 255, 0.26) 0%,
+                rgba(241, 247, 255, 0.82) 55%,
+                rgba(241, 247, 255, 0.96) 100%
+            );
+            backdrop-filter: blur(14px) saturate(150%);
+            -webkit-backdrop-filter: blur(14px) saturate(150%);
+            border-top: 1px solid rgba(255, 255, 255, 0.58);
+            box-shadow: 0 -10px 24px rgba(10, 33, 63, 0.08);
+        }
+
         /* Items List */
         .items-list {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: 0.3rem;
         }
 
         /* List View */
@@ -323,13 +346,59 @@ export const Layout = (props: {
             min-height: 50vh;
         }
 
+        .list-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 35;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            padding: 0.2rem 0 0.55rem;
+            background: linear-gradient(180deg, rgba(241, 247, 255, 0.95) 0%, rgba(241, 247, 255, 0.72) 70%, rgba(241, 247, 255, 0) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: gap 0.18s ease, padding 0.18s ease;
+        }
+
+        .list-back-btn {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.8rem;
+            min-height: 28px;
+        }
+
+        .list-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            line-height: 1.15;
+            transition: font-size 0.18s ease;
+        }
+
+        .list-toolbar.compact {
+            flex-direction: row;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.2rem 0 0.45rem;
+        }
+
+        .list-toolbar.compact .list-title {
+            font-size: 1.1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: calc(100% - 110px);
+        }
+
         .item {
             display: flex;
             gap: 0.75rem;
-            padding: 1rem 1rem;
+            padding: 0.85rem 1rem;
             background: linear-gradient(140deg, rgba(255, 255, 255, 0.54) 0%, rgba(233, 244, 255, 0.44) 100%);
-            border-radius: var(--radius-xl);
-            align-items: flex-start;
+            border-radius: 0;
+            align-items: center;
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--border-strong);
             backdrop-filter: blur(16px) saturate(150%);
@@ -340,12 +409,32 @@ export const Layout = (props: {
             height: 4.75rem;
         }
 
+        .item:first-child {
+            border-top-left-radius: var(--radius-xl);
+            border-top-right-radius: var(--radius-xl);
+        }
+
+        .item:last-child {
+            border-bottom-left-radius: var(--radius-xl);
+            border-bottom-right-radius: var(--radius-xl);
+        }
+
+        .item:only-child {
+            border-radius: var(--radius-xl);
+        }
+
         .item-content {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            gap: 0.3rem;
+            gap: 0.15rem;
             width: 100%;
+        }
+
+        .item.no-remark .item-content {
+            justify-content: center;
+            gap: 0;
+            height: 100%;
         }
 
         .item:hover {
@@ -362,13 +451,13 @@ export const Layout = (props: {
         .item-name {
             flex: 0 0 auto;
             font-family: 'D-DIN Condensed', sans-serif;
-            font-size: 1rem;
+            font-size: 1.06rem;
             font-weight: 600;
             color: var(--text-primary);
         }
 
         .item-remark {
-            font-size: 0.875rem;
+            font-size: 0.92rem;
             color: var(--text-secondary);
             display: block;
             width: 100%;
@@ -926,7 +1015,7 @@ export const Layout = (props: {
         </svg>
         <span>Offline Mode</span>
     </div>
-    <div class="container">
+    <div class="container ${props.currentListId ? 'has-search' : ''}">
 
         <div class="content" id="content">
             ${props.children}
@@ -1251,7 +1340,8 @@ export const Layout = (props: {
                         
                         if (!existing) {
                             // Item doesn't exist - add it
-                            let itemHtml = '<div class="item" data-item-id="' + serverItem.id + '" data-list-id="' + listId + '" data-item-name="' + serverItem.name + '">';
+                            const itemClass = serverItem.remark ? 'item' : 'item no-remark';
+                            let itemHtml = '<div class="' + itemClass + '" data-item-id="' + serverItem.id + '" data-list-id="' + listId + '" data-item-name="' + serverItem.name + '">';
                             itemHtml += '<div class="item-content">';
                             itemHtml += '<span class="item-name">' + serverItem.name + '</span>';
                             if (serverItem.remark) {
@@ -1277,6 +1367,7 @@ export const Layout = (props: {
                             
                             const remarkEl = existing.element.querySelector('.item-remark');
                             if (serverItem.remark) {
+                                existing.element.classList.remove('no-remark');
                                 if (remarkEl) {
                                     remarkEl.textContent = serverItem.remark;
                                 } else {
@@ -1285,8 +1376,11 @@ export const Layout = (props: {
                                         contentEl.insertAdjacentHTML('beforeend', '<span class="item-remark">' + serverItem.remark + '</span>');
                                     }
                                 }
-                            } else if (remarkEl) {
-                                remarkEl.remove();
+                            } else {
+                                existing.element.classList.add('no-remark');
+                                if (remarkEl) {
+                                    remarkEl.remove();
+                                }
                             }
                             hasChanges = true;
                         }
@@ -1339,6 +1433,29 @@ export const Layout = (props: {
             emptyMessage.style.display = itemCount === 0 ? 'block' : 'none';
         };
 
+        const initializeListToolbar = () => {
+            const toolbar = document.getElementById('list-toolbar');
+            const content = document.querySelector('.content');
+            if (!toolbar || !content) {
+                return;
+            }
+
+            const updateToolbarState = () => {
+                if (content.scrollTop > 8) {
+                    toolbar.classList.add('compact');
+                } else {
+                    toolbar.classList.remove('compact');
+                }
+            };
+
+            if (content.dataset.listToolbarBound !== 'true') {
+                content.addEventListener('scroll', updateToolbarState, { passive: true });
+                content.dataset.listToolbarBound = 'true';
+            }
+
+            updateToolbarState();
+        };
+
         const initializeItemInteractions = (item) => {
             if (!item || item.dataset.initialized === 'true') {
                 return;
@@ -1348,28 +1465,37 @@ export const Layout = (props: {
 
             let longPressTimer;
             let isLongPress = false;
+            let hasMovedTooFar = false;
             let touchStartX = 0;
             let touchStartY = 0;
+            let touchStartScrollTop = 0;
 
             const handleMouseDown = (e) => {
                 isLongPress = false;
+                hasMovedTooFar = false;
                 touchStartX = e.clientX || e.touches?.[0]?.clientX || 0;
                 touchStartY = e.clientY || e.touches?.[0]?.clientY || 0;
                 
+                // Record initial scroll position to detect vertical scrolling
+                const contentEl = document.querySelector('.content');
+                touchStartScrollTop = contentEl ? contentEl.scrollTop : 0;
+                
                 longPressTimer = setTimeout(() => {
-                    isLongPress = true;
-                    const itemId = item.dataset.itemId;
-                    const listId = item.dataset.listId;
-                    const editUrl = '/item/' + itemId + '/edit?listId=' + listId;
-                    htmx.ajax('GET', editUrl, {
-                        target: 'body',
-                        swap: 'beforeend'
-                    });
+                    if (!hasMovedTooFar) {
+                        isLongPress = true;
+                        const itemId = item.dataset.itemId;
+                        const listId = item.dataset.listId;
+                        const editUrl = '/item/' + itemId + '/edit?listId=' + listId;
+                        htmx.ajax('GET', editUrl, {
+                            target: 'body',
+                            swap: 'beforeend'
+                        });
+                    }
                 }, 500);
             };
 
             const handleMove = (e) => {
-                // Cancel long-press if movement exceeds threshold (10px)
+                // Cancel long-press if finger movement exceeds threshold (10px)
                 const currentX = e.clientX || e.touches?.[0]?.clientX || 0;
                 const currentY = e.clientY || e.touches?.[0]?.clientY || 0;
                 const distance = Math.sqrt(
@@ -1377,13 +1503,23 @@ export const Layout = (props: {
                 );
                 
                 if (distance > 10) {
+                    hasMovedTooFar = true;
                     clearTimeout(longPressTimer);
                 }
             };
 
-            const handleMouseUp = () => {
+            const handleMouseUp = (e) => {
                 clearTimeout(longPressTimer);
-                if (isLongPress) {
+                
+                // Check if page scrolled during touch
+                const contentEl = document.querySelector('.content');
+                const currentScrollTop = contentEl ? contentEl.scrollTop : 0;
+                const scrollDelta = Math.abs(currentScrollTop - touchStartScrollTop);
+                if (scrollDelta > 5) {
+                    hasMovedTooFar = true;
+                }
+                
+                if (isLongPress || hasMovedTooFar) {
                     return;
                 }
 
@@ -1413,12 +1549,12 @@ export const Layout = (props: {
             };
 
             item.addEventListener('mousedown', handleMouseDown);
-            item.addEventListener('mousemove', handleMove);
+            item.addEventListener('mousemove', handleMove, { passive: true });
             item.addEventListener('mouseup', handleMouseUp);
             item.addEventListener('mouseleave', () => clearTimeout(longPressTimer));
-            item.addEventListener('touchstart', handleMouseDown);
-            item.addEventListener('touchmove', handleMove);
-            item.addEventListener('touchend', handleMouseUp);
+            item.addEventListener('touchstart', handleMouseDown, { passive: true });
+            item.addEventListener('touchmove', handleMove, { passive: true });
+            item.addEventListener('touchend', handleMouseUp, { passive: true });
         };
 
         const initializeAllItems = () => {
@@ -1535,11 +1671,13 @@ export const Layout = (props: {
         document.addEventListener('DOMContentLoaded', () => {
             initializeAllItems();
             initializeAllListRows();
+            initializeListToolbar();
         });
 
         htmx.on('htmx:afterSwap', () => {
             initializeAllItems();
             initializeAllListRows();
+            initializeListToolbar();
         });
 
         htmx.on('htmx:afterRequest', (event) => {

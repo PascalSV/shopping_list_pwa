@@ -1,8 +1,8 @@
-import { html, HtmlEscapedString } from 'hono/html';
+import { html } from 'hono/html';
 import type { ShoppingItem, ShoppingList } from '../types';
 
 export const ListItemRow = (item: ShoppingItem, listId: string) => html`
-    <div class="item ${item.completed ? 'completed' : ''}" data-item-id="${item.id}" data-list-id="${listId}" data-item-name="${item.name}">
+    <div class="item ${item.completed ? 'completed' : ''} ${item.remark ? '' : 'no-remark'}" data-item-id="${item.id}" data-list-id="${listId}" data-item-name="${item.name}">
         <div class="item-content">
             <span class="item-name">${item.name}</span>
             ${item.remark ? html`<span class="item-remark">${item.remark}</span>` : ''}
@@ -16,23 +16,23 @@ export const ListView = (props: {
     items: ShoppingItem[];
 }) => html`
     <div class="list-view">
-        <div style="display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 1.5rem; gap: 0.75rem;">
+        <div id="list-toolbar" class="list-toolbar">
             <button 
-                class="btn btn-secondary"
+                class="btn btn-secondary list-back-btn"
                 hx-get="/lists"
                 hx-target="body"
                 hx-swap="innerHTML"
-                style="padding: 0.35rem 0.75rem; font-size: 0.8rem; min-height: 28px;"
             >
                 My lists
             </button>
-            <h2 id="current-list-title" data-list-id="${props.listId}" style="font-size: 1.75rem; font-weight: 700; color: var(--text-primary);">${props.listName}</h2>
+            <h2 id="current-list-title" class="list-title" data-list-id="${props.listId}">${props.listName}</h2>
         </div>
 
         ${props.items.length === 0 ? html`<div id="empty-message" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1rem; color: var(--text-secondary); text-align: center;">You have no more items to shop - well done!</div>` : ''}
 
         <div id="items-list" class="items-list">
             ${props.items.map(item => ListItemRow(item, props.listId))}
+        </div>
     </div>
 `;
 
@@ -215,16 +215,27 @@ export const EditItemForm = (props: {
                 <button type="submit" class="btn btn-primary">
                     Update
                 </button>
-                <button 
-                    type="button" 
-                    class="btn btn-secondary"
-                    hx-get="/list/${props.listId}" 
-                    hx-target="body" 
-                    hx-swap="innerHTML"
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    hx-delete="/api/lists/${props.listId}/items/${props.itemId}"
+                    hx-swap="none"
+                    hx-confirm="Delete this item?"
+                    hx-on::after-settle="if(event.detail.xhr.status === 200) { document.querySelector('.form-container')?.remove(); window.location.href = '/list/${props.listId}'; }"
                 >
-                    Cancel
+                    Delete
                 </button>
             </div>
+            <button
+                type="button"
+                class="btn btn-secondary"
+                hx-get="/list/${props.listId}"
+                hx-target="body"
+                hx-swap="innerHTML"
+                style="width: 100%; margin-top: 0.5rem;"
+            >
+                Cancel
+            </button>
         </form>
     </div>
 `;
