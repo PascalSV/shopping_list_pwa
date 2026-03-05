@@ -1,0 +1,9 @@
+name = "shopping-list-pwa"
+main = "src/worker/index.ts"
+compatibility_date = "2024-03-01"
+assets = { directory = "public" }
+
+[[d1_databases]]
+binding = "DB"
+database_name = "shopping_list_db"
+database_id = "aaac8ead-9b94-4c5c-982e-209bd6e4fa2e"

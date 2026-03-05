@@ -1,0 +1,36 @@
+{
+  "name": "shopping-list-pwa",
+  "version": "0.1.0",
+  "description": "Offline-first shopping list PWA with Cloudflare Workers",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "wrangler deploy --dry-run",
+    "db:migrate:local": "wrangler d1 migrations apply shopping_list_db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply shopping_list_db --remote",
+    "test": "npm run test:sync && npm run test:e2e",
+    "test:sync": "vitest run --fileParallelism false tests/multi-device-sync.test.ts tests/sync-api.test.ts tests/list-live-refresh.test.ts",
+    "test:e2e": "playwright test",
+    "test:load": "playwright test tests/e2e/load-test.spec.ts",
+    "test:all": "npm run test:sync && npm run test:e2e && npm run test:load",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
+  },
+  "dependencies": {
+    "date-fns": "^3.0.0",
+    "hono": "^4.0.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240620.0",
+    "@playwright/test": "^1.54.2",
+    "@types/node": "^25.3.3",
+    "@types/uuid": "^11.0.0",
+    "@vitest/ui": "^1.3.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.3.0",
+    "wrangler": "^4.70.0"
+  }
+}
