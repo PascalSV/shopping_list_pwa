@@ -18,8 +18,8 @@ export const Layout = (props: {
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>${props.title}</title>
     <link rel="manifest" href="/manifest.json" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+    <link rel="icon" type="image/png" href="/icons/icon-64.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <link rel="stylesheet" href="/fonts/fonts.css" />
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <style>
@@ -55,7 +55,7 @@ export const Layout = (props: {
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'D-DIN', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #f0f4ff 0%, #f5f0ff 100%);
             color: var(--text-primary);
             line-height: 1.6;
@@ -85,6 +85,7 @@ export const Layout = (props: {
         }
 
         .header h1 {
+            font-family: 'D-DIN', sans-serif;
             font-size: 1.75rem;
             font-weight: 700;
             display: flex;
@@ -95,20 +96,31 @@ export const Layout = (props: {
             color: var(--text-primary);
         }
 
+        h2, h3, h4, h5, h6 {
+            font-family: 'D-DIN', sans-serif;
+            font-weight: 700;
+        }
+
         .logo {
             width: 36px;
             height: 36px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             border-radius: var(--radius-lg);
-            padding: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(10px);
-            color: white;
+            background: transparent;
+            padding: 0;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            border-radius: var(--radius-lg);
+            display: block;
         }
 
         .btn {
+            font-family: 'D-DIN', sans-serif;
             padding: 0.45rem 0.85rem;
             border: none;
             border-radius: var(--radius-lg);
@@ -244,6 +256,7 @@ export const Layout = (props: {
 
         .item-name {
             flex: 1;
+            font-family: 'D-DIN Condensed', sans-serif;
             font-size: 1.125rem;
             font-weight: 600;
             color: var(--text-primary);
@@ -592,7 +605,8 @@ export const Layout = (props: {
             display: block;
             margin-bottom: 0.5rem;
             color: var(--text-secondary);
-            font-weight: 500;
+            font-family: 'D-DIN Condensed', sans-serif;
+            font-weight: 600;
             font-size: 0.95rem;
         }
 
@@ -664,8 +678,9 @@ export const Layout = (props: {
         }
 
         .list-row-name {
+            font-family: 'D-DIN Condensed', sans-serif;
             font-size: 1.05rem;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-primary);
             word-break: break-word;
         }
@@ -708,12 +723,7 @@ export const Layout = (props: {
         <div class="header">
             <h1>
                 <span class="logo">
-                    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 24px;">
-                        <path d="M6 12 L10 24 L22 24 L26 12 Z" fill="white" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
-                        <path d="M4 10 L6 12 L26 12" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-                        <circle cx="11" cy="27" r="2" fill="white"/>
-                        <circle cx="21" cy="27" r="2" fill="white"/>
-                    </svg>
+                    <img src="/icons/icon-64.png" alt="ShopList" style="width: 24px; height: 24px;" />
                 </span>
                 ShopList
             </h1>
@@ -730,144 +740,151 @@ export const Layout = (props: {
 
     <script>
         // === Offline Queue System ===
-        const OFFLINE_QUEUE_KEY = 'shopping-list-offline-queue';
-        let isOnline = navigator.onLine;
+        // Only initialize once per session to avoid redeclaration errors
+        if (typeof window.offlineQueueInitialized === 'undefined') {
+            window.offlineQueueInitialized = true;
+            
+            const OFFLINE_QUEUE_KEY = 'shopping-list-offline-queue';
+            let isOnline = navigator.onLine;
 
-        // Get queued operations from localStorage
-        const getOfflineQueue = () => {
-            try {
-                const queue = localStorage.getItem(OFFLINE_QUEUE_KEY);
-                return queue ? JSON.parse(queue) : [];
-            } catch (err) {
-                console.error('Failed to read offline queue:', err);
-                return [];
-            }
-        };
+            // Store in window for access across script executions
+            window.offlineQueueState = { isOnline };
 
-        // Save queued operations to localStorage
-        const saveOfflineQueue = (queue) => {
-            try {
-                localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue));
-            } catch (err) {
-                console.error('Failed to save offline queue:', err);
-            }
-        };
-
-        // Add operation to offline queue
-        const queueOfflineOperation = (operation) => {
-            const queue = getOfflineQueue();
-            queue.push({
-                ...operation,
-                timestamp: Date.now()
-            });
-            saveOfflineQueue(queue);
-        };
-
-        // Update offline badge visibility
-        const updateOfflineStatus = () => {
-            const offlineBadge = document.getElementById('offline-badge');
-            if (!offlineBadge) {
-                return;
-            }
-
-            if (isOnline) {
-                offlineBadge.classList.remove('visible');
-            } else {
-                offlineBadge.classList.add('visible');
-            }
-        };
-
-        // Process offline queue when back online
-        const processOfflineQueue = async () => {
-            if (!isOnline) {
-                return;
-            }
-
-            const queue = getOfflineQueue();
-            if (queue.length === 0) {
-                return;
-            }
-
-            console.log('Processing offline queue:', queue.length, 'operations');
-
-            const failedOperations = [];
-
-            for (const operation of queue) {
+            // Get queued operations from localStorage
+            const getOfflineQueue = () => {
                 try {
-                    const requestOptions = {
-                        method: operation.method,
-                        headers: operation.headers || { 'Content-Type': 'application/json' }
-                    };
-
-                    // Add body for POST/PUT/PATCH requests
-                    if (operation.body && (operation.method === 'POST' || operation.method === 'PUT' || operation.method === 'PATCH')) {
-                        // If body is object, convert to FormData format (HTMX style)
-                        if (typeof operation.body === 'object') {
-                            const formData = new URLSearchParams();
-                            for (const key in operation.body) {
-                                formData.append(key, operation.body[key]);
-                            }
-                            requestOptions.body = formData.toString();
-                            requestOptions.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-                        } else {
-                            requestOptions.body = operation.body;
-                        }
-                    }
-
-                    const response = await fetch(operation.url, requestOptions);
-
-                    if (!response.ok) {
-                        console.error('Failed to process queued operation:', operation);
-                        failedOperations.push(operation);
-                    } else {
-                        console.log('Successfully processed queued operation:', operation.method, operation.url);
-                        
-                        // Clean up local storage for this operation
-                        if (operation.url.includes('/lists/')) {
-                            localStorage.removeItem('offline-list-update-' + operation.url);
-                        }
-                    }
+                    const queue = localStorage.getItem(OFFLINE_QUEUE_KEY);
+                    return queue ? JSON.parse(queue) : [];
                 } catch (err) {
-                    console.error('Error processing queued operation:', err);
-                    failedOperations.push(operation);
+                    console.error('Failed to read offline queue:', err);
+                    return [];
                 }
-            }
+            };
 
-            // Save only failed operations back to queue
-            saveOfflineQueue(failedOperations);
+            // Save queued operations to localStorage
+            const saveOfflineQueue = (queue) => {
+                try {
+                    localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue));
+                } catch (err) {
+                    console.error('Failed to save offline queue:', err);
+                }
+            };
 
-            // Reload the page to show updated data
-            if (failedOperations.length < queue.length) {
-                showNotification('Offline changes synced successfully', 'success');
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            }
-        };
+            // Add operation to offline queue
+            const queueOfflineOperation = (operation) => {
+                const queue = getOfflineQueue();
+                queue.push({
+                    ...operation,
+                    timestamp: Date.now()
+                });
+                saveOfflineQueue(queue);
+            };
 
-        // Listen for online/offline events
-        window.addEventListener('online', () => {
-            console.log('Connection restored - processing offline queue');
-            isOnline = true;
+            // Update offline badge visibility
+            const updateOfflineStatus = () => {
+                const offlineBadge = document.getElementById('offline-badge');
+                if (!offlineBadge) {
+                    return;
+                }
+
+                if (window.offlineQueueState.isOnline) {
+                    offlineBadge.classList.remove('visible');
+                } else {
+                    offlineBadge.classList.add('visible');
+                }
+            };
+
+            // Process offline queue when back online
+            const processOfflineQueue = async () => {
+                if (!window.offlineQueueState.isOnline) {
+                    return;
+                }
+
+                const queue = getOfflineQueue();
+                if (queue.length === 0) {
+                    return;
+                }
+
+                console.log('Processing offline queue:', queue.length, 'operations');
+
+                const failedOperations = [];
+
+                for (const operation of queue) {
+                    try {
+                        const requestOptions = {
+                            method: operation.method,
+                            headers: operation.headers || { 'Content-Type': 'application/json' }
+                        };
+
+                        // Add body for POST/PUT/PATCH requests
+                        if (operation.body && (operation.method === 'POST' || operation.method === 'PUT' || operation.method === 'PATCH')) {
+                            // If body is object, convert to FormData format (HTMX style)
+                            if (typeof operation.body === 'object') {
+                                const formData = new URLSearchParams();
+                                for (const key in operation.body) {
+                                    formData.append(key, operation.body[key]);
+                                }
+                                requestOptions.body = formData.toString();
+                                requestOptions.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+                            } else {
+                                requestOptions.body = operation.body;
+                            }
+                        }
+
+                        const response = await fetch(operation.url, requestOptions);
+
+                        if (!response.ok) {
+                            console.error('Failed to process queued operation:', operation);
+                            failedOperations.push(operation);
+                        } else {
+                            console.log('Successfully processed queued operation:', operation.method, operation.url);
+                            
+                            // Clean up local storage for this operation
+                            if (operation.url.includes('/lists/')) {
+                                localStorage.removeItem('offline-list-update-' + operation.url);
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Error processing queued operation:', err);
+                        failedOperations.push(operation);
+                    }
+                }
+
+                // Save only failed operations back to queue
+                saveOfflineQueue(failedOperations);
+
+                // Reload the page to show updated data
+                if (failedOperations.length < queue.length) {
+                    showNotification('Offline changes synced successfully', 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
+            };
+
+            // Listen for online/offline events
+            window.addEventListener('online', () => {
+                console.log('Connection restored - processing offline queue');
+                window.offlineQueueState.isOnline = true;
+                updateOfflineStatus();
+                processOfflineQueue();
+            });
+
+            window.addEventListener('offline', () => {
+                console.log('Connection lost - entering offline mode');
+                window.offlineQueueState.isOnline = false;
+                updateOfflineStatus();
+            });
+
+            // Initialize offline status
             updateOfflineStatus();
-            processOfflineQueue();
-        });
 
-        window.addEventListener('offline', () => {
-            console.log('Connection lost - entering offline mode');
-            isOnline = false;
-            updateOfflineStatus();
-        });
-
-        // Initialize offline status on page load
-        updateOfflineStatus();
-
-        // Handle failed requests for offline queueing
-        // Listen for HTMX response errors to queue failed operations
-        document.body.addEventListener('htmx:responseError', function(event) {
-            // Only queue if we're offline
-            if (navigator.onLine) {
-                return;
+            // Handle failed requests for offline queueing
+            // Listen for HTMX response errors to queue failed operations
+            document.body.addEventListener('htmx:responseError', function(event) {
+                // Only queue if we're offline
+                if (navigator.onLine) {
+                    return;
             }
 
             const detail = event.detail;
@@ -979,6 +996,7 @@ export const Layout = (props: {
             refreshListTitleFromServer();
             window.setInterval(refreshListTitleFromServer, 4000);
         }
+        } // Close initialization block
 
         // Poll items for the current list
         const itemsList = document.getElementById('items-list');
@@ -1104,7 +1122,7 @@ export const Layout = (props: {
                 const deleteUrl = '/api/lists/' + listId + '/items/' + itemId;
 
                 // Optimistic update: immediately mark item as being deleted
-                if (!isOnline) {
+                if (!navigator.onLine) {
                     // When offline, just add visual feedback and queue the operation
                     item.classList.add('optimistic-delete');
                     
@@ -1259,6 +1277,6 @@ export const Layout = (props: {
                 setTimeout(updateEmptyState, 120);
             }
         });
-    </script >
-</body >
-</html > `;
+    </script>
+</body>
+</html>`;

@@ -1,35 +1,40 @@
-/* Modern Inter Font from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-/* Fallback rule for Inter font */
+/* D-DIN Font Family */
 @font-face {
-    font-family: 'Inter';
+    font-family: 'D-DIN';
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: local('Inter'), local('Inter-Regular');
+    src: url('/fonts/D-DIN.otf') format('opentype');
 }
 
 @font-face {
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 500;
+    font-family: 'D-DIN';
+    font-style: italic;
+    font-weight: 400;
     font-display: swap;
-    src: local('Inter Medium'), local('Inter-Medium');
+    src: url('/fonts/D-DIN-Italic.otf') format('opentype');
 }
 
 @font-face {
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 600;
-    font-display: swap;
-    src: local('Inter SemiBold'), local('Inter-SemiBold');
-}
-
-@font-face {
-    font-family: 'Inter';
+    font-family: 'D-DIN';
     font-style: normal;
     font-weight: 700;
     font-display: swap;
-    src: local('Inter Bold'), local('Inter-Bold');
+    src: url('/fonts/D-DIN-Bold.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'D-DIN Condensed';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/D-DINCondensed.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'D-DIN Condensed';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('/fonts/D-DINCondensed-Bold.otf') format('opentype');
 }

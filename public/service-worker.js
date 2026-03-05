@@ -3,10 +3,9 @@ const CACHE_NAME = 'shoplist-v2';
 const urlsToCache = [
     '/',
     '/manifest.json',
-    '/favicon.svg',
-    '/icons/logo.svg',
-    '/icons/icon-192.svg',
-    '/icons/icon-512.svg',
+    '/icons/icon-64.png',
+    '/icons/icon-192.png',
+    '/icons/icon-512.png',
     'https://unpkg.com/htmx.org@1.9.10'
 ];
 
@@ -145,12 +144,4 @@ self.addEventListener('message', event => {
     if (event.data && event.data.type === 'SKIP_WAITING') {
         self.skipWaiting();
     }
-});
-if (cacheName !== CACHE_NAME) {
-    return caches.delete(cacheName);
-}
-                })
-            );
-        })
-    );
 });
