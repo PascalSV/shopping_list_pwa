@@ -188,34 +188,21 @@ export const ListsManagementView = (props: {
             </div>
         </div>
 
-        <!-- Delete Confirmation Modal -->
-        <div id="deleteModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center;">
-            <div style="background: linear-gradient(145deg, rgba(255, 255, 255, 0.55) 0%, rgba(232, 243, 255, 0.45) 100%); padding: 2rem; border-radius: var(--radius-xl); box-shadow: var(--shadow-xl); border: 1px solid var(--border-strong); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); max-width: 400px; width: 90%; animation: slideUp 0.3s ease;">
-                <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0 0 1rem 0;">Delete List?</h3>
+        <!-- Delete Confirmation Modal (styled like Create List dialog) -->
+        <div id="deleteModal" class="form-container" style="display: none;">
+            <form id="deleteModalForm">
+                <h2>Delete List</h2>
                 <p id="deleteMessage" style="color: var(--text-secondary); margin: 0 0 1.5rem 0; line-height: 1.5;"></p>
-                <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
-                    <button id="cancelDeleteBtn" style="padding: 0.75rem 1.5rem; background: transparent; border: 1px solid var(--border-strong); border-radius: var(--radius-md); cursor: pointer; color: var(--text-primary); font-weight: 600; transition: all 0.2s;">
-                        Cancel
-                    </button>
-                    <button id="confirmDeleteBtn" style="padding: 0.75rem 1.5rem; background: var(--danger); border: none; border-radius: var(--radius-md); cursor: pointer; color: white; font-weight: 600; transition: all 0.2s;">
+                <div class="form-actions">
+                    <button id="confirmDeleteBtn" type="button" class="btn btn-danger">
                         Delete
                     </button>
+                    <button id="cancelDeleteBtn" type="button" class="btn btn-secondary">
+                        Cancel
+                    </button>
                 </div>
-            </div>
+            </form>
         </div>
-
-        <style>
-            @keyframes slideUp {
-                from {
-                    opacity: 0;
-                    transform: translateY(20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-        </style>
 
         <script>
             let pendingDeleteListId = null;

@@ -1290,10 +1290,11 @@ export const Layout = (props: {
         } // Close initialization block
 
         // Poll items for the current list
-        const itemsList = document.getElementById('items-list');
-        const currentTitle2 = document.getElementById('current-list-title');
+        {
+            const itemsList = document.getElementById('items-list');
+            const currentTitle2 = document.getElementById('current-list-title');
 
-        if (itemsList && currentTitle2) {
+            if (itemsList && currentTitle2) {
             const refreshItemsFromServer = async () => {
                 try {
                     const listId = currentTitle2.getAttribute('data-list-id');
@@ -1414,10 +1415,12 @@ export const Layout = (props: {
             refreshItemsFromServer();
             window.setInterval(refreshItemsFromServer, 4000);
         }
+        } // Close polling block
 
-        const searchInput = document.getElementById('search-input');
-        const suggestionsContainer = document.getElementById('suggestions-container');
-        const searchForm = searchInput ? searchInput.closest('form') : null;
+        {
+            const searchInput = document.getElementById('search-input');
+            const suggestionsContainer = document.getElementById('suggestions-container');
+            const searchForm = searchInput ? searchInput.closest('form') : null;
 
         const clearSuggestions = () => {
             if (suggestionsContainer) {
@@ -1670,6 +1673,7 @@ export const Layout = (props: {
                 }
             });
         }
+        } // Close search block
 
         document.addEventListener('DOMContentLoaded', () => {
             initializeAllItems();
