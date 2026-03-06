@@ -17,11 +17,13 @@ const SESSION_COOKIE = 'shopping_auth';
 type AppUser = 'PascalSV' | 'ClaudiaSV';
 
 const resolveUserBySecret = (secret: string, c: any): AppUser | null => {
-    if (secret === c.env.PASCAL_PASS) {
+    const trimmedSecret = secret.trim();
+
+    if (trimmedSecret === c.env.PASCAL_PASS?.trim()) {
         return 'PascalSV';
     }
 
-    if (secret === c.env.CLAUDIA_PASS) {
+    if (trimmedSecret === c.env.CLAUDIA_PASS?.trim()) {
         return 'ClaudiaSV';
     }
 
@@ -49,10 +51,6 @@ const resolveUserFromRequest = (c: any): AppUser | null => {
 
 const isPublicPath = (path: string): boolean => {
     if (path === '/login') {
-        return true;
-    }
-
-    if (path === '/logout') {
         return true;
     }
 
@@ -117,7 +115,7 @@ app.post('/login', async (c) => {
         return c.redirect('/login?error=missing', 302);
     }
 
-    const expectedPassword = username === 'PascalSV' ? c.env.PASCAL_PASS : c.env.CLAUDIA_PASS;
+    const expectedPassword = (username === 'PascalSV' ? c.env.PASCAL_PASS : c.env.CLAUDIA_PASS)?.trim();
 
     if (providedPassword !== expectedPassword) {
         return c.redirect('/login?error=invalid', 302);
@@ -133,18 +131,6 @@ app.post('/login', async (c) => {
 
     return c.redirect('/lists', 302);
 });
-
-app.post('/logout', async (c) => {
-    deleteCookie(c, SESSION_COOKIE, { path: '/' });
-    return c.redirect('/login', 302);
-});
-
-app.get('/logout', async (c) => {
-    deleteCookie(c, SESSION_COOKIE, { path: '/' });
-    return c.redirect('/login', 302);
-});
-
-
 
 // Page Routes
 app.get('/', async (c) => {
