@@ -137,6 +137,7 @@ export const Layout = (props: {
             position: relative;
             z-index: 1;
             overflow: hidden;
+            padding-top: env(safe-area-inset-top);
         }
 
         .container::before {
@@ -153,9 +154,7 @@ export const Layout = (props: {
 
         /* Header Styles */
         .header {
-            background: transparent;
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
+            background: white;
             color: var(--text-primary);
             padding: 0.5rem 1.5rem;
             box-shadow: none;
@@ -253,13 +252,13 @@ export const Layout = (props: {
         }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.42);
+            background: #cccccc;
             color: var(--text-primary);
             border: 1px solid var(--border-strong);
         }
 
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.62);
+            background: #bbbbbb;
             transform: translateY(-1px);
             box-shadow: var(--shadow-md);
         }
@@ -294,21 +293,19 @@ export const Layout = (props: {
             min-height: 0;
             overflow-y: auto;
             padding: 1.5rem;
-            padding-bottom: calc(140px + env(safe-area-inset-bottom));
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(233, 244, 255, 0.08) 100%);
+            padding-bottom: 1rem;
+            background: white;
         }
 
         /* Footer Styles */
         .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            position: relative;
             max-width: 720px;
             margin: 0 auto;
             width: 100%;
-            padding: 1rem;
-            padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+            flex-shrink: 0;
+            padding: 0.65rem;
+            padding-bottom: calc(0.65rem + env(safe-area-inset-bottom));
             background: transparent;
             backdrop-filter: none;
             -webkit-backdrop-filter: none;
@@ -322,14 +319,7 @@ export const Layout = (props: {
         }
 
         .container.has-search .footer {
-            background: linear-gradient(
-                to bottom,
-                rgba(241, 247, 255, 0.26) 0%,
-                rgba(241, 247, 255, 0.82) 55%,
-                rgba(241, 247, 255, 0.96) 100%
-            );
-            backdrop-filter: blur(14px) saturate(150%);
-            -webkit-backdrop-filter: blur(14px) saturate(150%);
+            background: #cccccc;
             border-top: 1px solid rgba(255, 255, 255, 0.58);
             box-shadow: 0 -10px 24px rgba(10, 33, 63, 0.08);
         }
@@ -338,7 +328,7 @@ export const Layout = (props: {
         .items-list {
             display: flex;
             flex-direction: column;
-            gap: 0.3rem;
+            gap: 0.2rem;
         }
 
         /* List View */
@@ -355,11 +345,12 @@ export const Layout = (props: {
             flex-direction: column;
             align-items: flex-start;
             gap: 0.75rem;
-            margin-bottom: 1.25rem;
-            padding: 0.2rem 0 0.55rem;
-            background: linear-gradient(180deg, rgba(241, 247, 255, 0.95) 0%, rgba(241, 247, 255, 0.72) 70%, rgba(241, 247, 255, 0) 100%);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            margin-top: -1.5rem;
+            margin-left: -1.5rem;
+            margin-right: -1.5rem;
+            margin-bottom: 0.75rem;
+            padding: 0.2rem 1.5rem 0.75rem;
+            background: white;
             transition: gap 0.18s ease, padding 0.18s ease;
         }
 
@@ -382,7 +373,7 @@ export const Layout = (props: {
             flex-direction: row;
             align-items: center;
             gap: 0.6rem;
-            padding: 0.2rem 0 0.45rem;
+            padding: 0.2rem 1.5rem 0.6rem;
         }
 
         .list-toolbar.compact .list-title {
@@ -393,21 +384,28 @@ export const Layout = (props: {
             max-width: calc(100% - 110px);
         }
 
+        .scrolling-list-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 1rem 0;
+            line-height: 1.15;
+            padding: 0;
+        }
+
         .item {
             display: flex;
             gap: 0.75rem;
             padding: 0.85rem 1rem;
-            background: linear-gradient(140deg, rgba(255, 255, 255, 0.54) 0%, rgba(233, 244, 255, 0.44) 100%);
+            background: #FF6969;
             border-radius: 0;
             align-items: center;
             box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-strong);
-            backdrop-filter: blur(16px) saturate(150%);
-            -webkit-backdrop-filter: blur(16px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             transition: all 0.2s ease;
             position: relative;
             cursor: pointer;
-            height: 4.75rem;
+            height: 4rem;
         }
 
         .item:first-child {
@@ -428,7 +426,7 @@ export const Layout = (props: {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            gap: 0.15rem;
+            gap: 0.05rem;
             width: 100%;
         }
 
@@ -441,11 +439,11 @@ export const Layout = (props: {
         .item:hover {
             box-shadow: var(--shadow-md);
             transform: translateY(-2px);
-            border-color: rgba(113, 186, 255, 0.95);
+            border-color: rgba(255, 255, 255, 0.6);
         }
 
         .item.completed {
-            background: linear-gradient(140deg, rgba(231, 238, 247, 0.54) 0%, rgba(223, 234, 246, 0.58) 100%);
+            background: #FF6969;
             opacity: 0.82;
         }
 
@@ -454,12 +452,12 @@ export const Layout = (props: {
             font-family: 'D-DIN Condensed', sans-serif;
             font-size: 1.06rem;
             font-weight: 600;
-            color: var(--text-primary);
+            color: white;
         }
 
         .item-remark {
             font-size: 0.92rem;
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.9);
             display: block;
             width: 100%;
             overflow: hidden;
@@ -521,20 +519,47 @@ export const Layout = (props: {
 
         .search-form {
             display: flex;
-            gap: 0.5rem;
-            background: rgba(255, 255, 255, 0.36);
+            gap: 0.4rem;
+            background: white;
             border-radius: var(--radius-xl);
-            border: 1px solid var(--border-strong);
-            box-shadow: var(--shadow-sm);
-            padding: 0.45rem;
-            backdrop-filter: blur(18px) saturate(170%);
-            -webkit-backdrop-filter: blur(18px) saturate(170%);
+            padding: 0.35rem;
+            border: 1px solid var(--border);
+        }
+
+        .inline-error-banner {
+            width: 100%;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(10px);
+            margin-bottom: 0;
+            padding: 0 1rem;
+            border-radius: var(--radius-lg);
+            color: #8a140a;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            border: 1px solid transparent;
+            background: linear-gradient(130deg, rgba(255, 108, 96, 0.12) 0%, rgba(255, 72, 56, 0.08) 100%);
+            backdrop-filter: blur(18px) saturate(185%);
+            -webkit-backdrop-filter: blur(18px) saturate(185%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 8px 24px rgba(172, 36, 20, 0.14);
+            transition: max-height 0.28s ease, opacity 0.22s ease, transform 0.22s ease, margin-bottom 0.22s ease, padding 0.22s ease;
+        }
+
+        .inline-error-banner.show {
+            max-height: 84px;
+            opacity: 1;
+            transform: translateY(0);
+            margin-bottom: 0.65rem;
+            padding: 0.7rem 1rem;
+            border-color: rgba(202, 37, 19, 0.34);
         }
 
         .search-form input {
             flex: 1;
             min-width: 0;
-            padding: 0.75rem 1rem;
+            padding: 0.5rem 0.85rem;
             border: 1px solid rgba(255, 255, 255, 0.42);
             border-radius: var(--radius-lg);
             font-size: 1rem;
@@ -579,23 +604,6 @@ export const Layout = (props: {
             display: none;
         }
 
-        .suggestions-error-message {
-            width: min(100%, 540px);
-            text-align: center;
-            padding: 0.7rem 0.95rem;
-            border-radius: var(--radius-lg);
-            color: #8a140a;
-            font-size: 0.9rem;
-            font-weight: 600;
-            letter-spacing: 0.01em;
-            border: 1px solid rgba(202, 37, 19, 0.32);
-            background: linear-gradient(130deg, rgba(255, 108, 96, 0.18) 0%, rgba(255, 72, 56, 0.11) 100%);
-            backdrop-filter: blur(20px) saturate(190%);
-            -webkit-backdrop-filter: blur(20px) saturate(190%);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 10px 26px rgba(172, 36, 20, 0.18);
-            animation: glassRise 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
-        }
-
         .suggestion-btn {
             padding: 0.5rem 1rem;
             background: linear-gradient(135deg, rgba(10, 132, 255, 0.88) 0%, rgba(90, 200, 250, 0.8) 100%);
@@ -620,12 +628,12 @@ export const Layout = (props: {
         }
 
         .btn-icon-clear {
-            padding: 0.75rem;
-            width: 42px;
-            height: 42px;
+            padding: 0.5rem;
+            width: 36px;
+            height: 36px;
             border-radius: var(--radius-lg);
             border: 1px solid var(--border-strong);
-            background: rgba(255, 255, 255, 0.36);
+            background: #cccccc;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
@@ -643,8 +651,8 @@ export const Layout = (props: {
         }
 
         .btn-icon-clear svg {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             stroke-width: 2;
         }
 
@@ -857,8 +865,9 @@ export const Layout = (props: {
                 min-width: 0;
             }
 
-            .suggestions-error-message {
+            .inline-error-banner.show {
                 font-size: 0.86rem;
+                margin-bottom: 0.5rem;
                 padding: 0.62rem 0.85rem;
             }
         }
@@ -1047,7 +1056,10 @@ export const Layout = (props: {
         </div>
 
         <div class="footer">
-            ${props.currentListId ? SearchForm({ listId: props.currentListId }) : ''}
+            ${props.currentListId ? html`
+                <div id="inline-error-banner" class="inline-error-banner" role="status" aria-live="polite"></div>
+                ${SearchForm({ listId: props.currentListId })}
+            ` : ''}
         </div>
     </div>
 
@@ -1453,25 +1465,37 @@ export const Layout = (props: {
 
         const initializeListToolbar = () => {
             const toolbar = document.getElementById('list-toolbar');
-            const content = document.querySelector('.content');
-            if (!toolbar || !content) {
+            const toolbarTitle = document.getElementById('toolbar-title');
+            const scrollingTitle = document.getElementById('scrolling-title');
+            
+            if (!toolbar || !toolbarTitle || !scrollingTitle) {
                 return;
             }
 
-            const updateToolbarState = () => {
-                if (content.scrollTop > 8) {
-                    toolbar.classList.add('compact');
-                } else {
-                    toolbar.classList.remove('compact');
-                }
-            };
-
-            if (content.dataset.listToolbarBound !== 'true') {
-                content.addEventListener('scroll', updateToolbarState, { passive: true });
-                content.dataset.listToolbarBound = 'true';
+            // Disconnect previous observer if exists
+            if (window.listTitleObserver) {
+                window.listTitleObserver.disconnect();
             }
 
-            updateToolbarState();
+            // Create intersection observer
+            window.listTitleObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    // Show toolbar title when scrolling title is NOT fully visible
+                    if (entry.intersectionRatio < 1) {
+                        // Scrolling title is partially hidden or not visible
+                        toolbarTitle.style.display = 'block';
+                        toolbar.classList.add('compact');
+                    } else {
+                        // Scrolling title is fully visible
+                        toolbarTitle.style.display = 'none';
+                        toolbar.classList.remove('compact');
+                    }
+                });
+            }, {
+                threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+            });
+
+            window.listTitleObserver.observe(scrollingTitle);
         };
 
         const initializeItemInteractions = (item) => {
@@ -1716,9 +1740,10 @@ export const Layout = (props: {
             const requestPath = pathInfo && pathInfo.requestPath ? pathInfo.requestPath : '';
             if (requestPath.indexOf('/api/lists/') !== -1 && requestPath.indexOf('/items') !== -1) {
                 if (event.detail.successful) {
-                    const suggestionsContainer = document.getElementById('suggestions-container');
-                    if (suggestionsContainer) {
-                        suggestionsContainer.innerHTML = '';
+                    const inlineErrorBanner = document.getElementById('inline-error-banner');
+                    if (inlineErrorBanner) {
+                        inlineErrorBanner.classList.remove('show');
+                        inlineErrorBanner.textContent = '';
                     }
                 }
                 setTimeout(updateEmptyState, 120);
@@ -1739,20 +1764,12 @@ export const Layout = (props: {
                 } catch (e) {
                     // Use default message
                 }
-                const suggestionsContainer = document.getElementById('suggestions-container');
-                if (suggestionsContainer) {
-                    // Clear active suggestions first, then show floating duplicate warning in the same area.
-                    suggestionsContainer.innerHTML = '';
-                    const errorMessage = document.createElement('div');
-                    errorMessage.className = 'suggestions-error-message';
-                    errorMessage.setAttribute('role', 'status');
-                    errorMessage.textContent = message;
-                    suggestionsContainer.appendChild(errorMessage);
-
+                const inlineErrorBanner = document.getElementById('inline-error-banner');
+                if (inlineErrorBanner) {
+                    inlineErrorBanner.textContent = message;
+                    inlineErrorBanner.classList.add('show');
                     setTimeout(() => {
-                        if (suggestionsContainer.contains(errorMessage)) {
-                            suggestionsContainer.innerHTML = '';
-                        }
+                        inlineErrorBanner.classList.remove('show');
                     }, 4500);
                 } else {
                     window.showNotification(message, 'error');

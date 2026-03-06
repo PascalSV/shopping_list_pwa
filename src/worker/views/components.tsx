@@ -103,10 +103,12 @@ export const ListView = (props: {
                 hx-target="body"
                 hx-swap="innerHTML"
             >
-                < Lists
+                My Lists
             </button>
-            <h2 id="current-list-title" class="list-title" data-list-id="${props.listId}">${props.listName}</h2>
+            <h2 id="toolbar-title" class="list-title" style="display: none;" data-list-id="${props.listId}">${props.listName}</h2>
         </div>
+
+        <h2 id="scrolling-title" class="scrolling-list-title" data-list-id="${props.listId}">${props.listName}</h2>
 
         ${props.items.length === 0 ? html`<div id="empty-message" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1rem; color: var(--text-secondary); text-align: center;">You have no more items to shop - well done!</div>` : ''}
 
