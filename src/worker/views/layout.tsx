@@ -579,6 +579,23 @@ export const Layout = (props: {
             display: none;
         }
 
+        .suggestions-error-message {
+            width: min(100%, 540px);
+            text-align: center;
+            padding: 0.7rem 0.95rem;
+            border-radius: var(--radius-lg);
+            color: #8a140a;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            border: 1px solid rgba(202, 37, 19, 0.32);
+            background: linear-gradient(130deg, rgba(255, 108, 96, 0.18) 0%, rgba(255, 72, 56, 0.11) 100%);
+            backdrop-filter: blur(20px) saturate(190%);
+            -webkit-backdrop-filter: blur(20px) saturate(190%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 10px 26px rgba(172, 36, 20, 0.18);
+            animation: glassRise 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
         .suggestion-btn {
             padding: 0.5rem 1rem;
             background: linear-gradient(135deg, rgba(10, 132, 255, 0.88) 0%, rgba(90, 200, 250, 0.8) 100%);
@@ -838,6 +855,11 @@ export const Layout = (props: {
 
             .search-form input {
                 min-width: 0;
+            }
+
+            .suggestions-error-message {
+                font-size: 0.86rem;
+                padding: 0.62rem 0.85rem;
             }
         }
 
@@ -1176,61 +1198,61 @@ export const Layout = (props: {
                 // Only queue if we're offline
                 if (navigator.onLine) {
                     return;
-            }
-
-            const detail = event.detail;
-            if (!detail || !detail.requestConfig) {
-                return;
-            }
-
-            const verb = detail.requestConfig.verb;
-            const path = detail.requestConfig.path;
-            const parameters = detail.requestConfig.parameters;
-
-            // Queue DELETE requests that failed due to offline status
-            if (verb === 'DELETE') {
-                queueOfflineOperation({
-                    method: 'DELETE',
-                    url: path,
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                console.log('Queued failed offline DELETE:', path);
-                showNotification("Operation queued for when you're back online", 'info');
-            }
-            // Queue PUT/PATCH requests (updates)
-            else if (verb === 'PUT' || verb === 'PATCH') {
-                queueOfflineOperation({
-                    method: verb,
-                    url: path,
-                    body: parameters,
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                console.log('Queued failed offline', verb + ':', path);
-                showNotification("Changes saved locally and will sync when online", 'info');
-                
-                // Store the update locally for immediate UI feedback
-                if (path.includes('/lists/') && parameters && parameters.name) {
-                    localStorage.setItem('offline-list-update-' + path, JSON.stringify(parameters));
                 }
-            }
-            // Queue POST requests (creates)
-            else if (verb === 'POST') {
-                queueOfflineOperation({
-                    method: 'POST',
-                    url: path,
-                    body: parameters,
-                    headers: { 'Content-Type': 'application/json' }
-                });
 
-                console.log('Queued failed offline POST:', path);
-                showNotification("Changes saved locally and will sync when online", 'info');
-            }
-        });
+                    const detail = event.detail;
+                if (!detail || !detail.requestConfig) {
+                    return;
+                }
 
-        // Helper to show notifications
-        const showNotification = (message, type = 'success') => {
+                const verb = detail.requestConfig.verb;
+                const path = detail.requestConfig.path;
+                const parameters = detail.requestConfig.parameters;
+
+                // Queue DELETE requests that failed due to offline status
+                if (verb === 'DELETE') {
+                    queueOfflineOperation({
+                        method: 'DELETE',
+                        url: path,
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    console.log('Queued failed offline DELETE:', path);
+                    showNotification("Operation queued for when you're back online", 'info');
+                }
+                // Queue PUT/PATCH requests (updates)
+                else if (verb === 'PUT' || verb === 'PATCH') {
+                    queueOfflineOperation({
+                        method: verb,
+                        url: path,
+                        body: parameters,
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    console.log('Queued failed offline', verb + ':', path);
+                    showNotification("Changes saved locally and will sync when online", 'info');
+                    
+                    // Store the update locally for immediate UI feedback
+                    if (path.includes('/lists/') && parameters && parameters.name) {
+                        localStorage.setItem('offline-list-update-' + path, JSON.stringify(parameters));
+                    }
+                }
+                // Queue POST requests (creates)
+                else if (verb === 'POST') {
+                    queueOfflineOperation({
+                        method: 'POST',
+                        url: path,
+                        body: parameters,
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    console.log('Queued failed offline POST:', path);
+                    showNotification("Changes saved locally and will sync when online", 'info');
+                }
+            });
+
+        // Helper to show notifications (attached to window for global access)
+        window.showNotification = (message, type = 'success') => {
             const notification = document.createElement('div');
             notification.className = 'notification ' + type;
             notification.textContent = message;
@@ -1240,6 +1262,7 @@ export const Layout = (props: {
                 notification.remove();
             }, 3000);
         };
+        const showNotification = window.showNotification; // Alias for convenience
 
         // Register service worker
         if ('serviceWorker' in navigator) {
@@ -1416,17 +1439,6 @@ export const Layout = (props: {
             window.setInterval(refreshItemsFromServer, 4000);
         }
         } // Close polling block
-
-        {
-            const searchInput = document.getElementById('search-input');
-            const suggestionsContainer = document.getElementById('suggestions-container');
-            const searchForm = searchInput ? searchInput.closest('form') : null;
-
-        const clearSuggestions = () => {
-            if (suggestionsContainer) {
-                suggestionsContainer.innerHTML = '';
-            }
-        };
 
         const updateEmptyState = () => {
             const emptyMessage = document.getElementById('empty-message');
@@ -1629,6 +1641,18 @@ export const Layout = (props: {
             listRows.forEach(row => initializeListRowInteractions(row));
         };
 
+        // Search and autocomplete functionality
+        {
+            const searchInput = document.getElementById('search-input');
+            const suggestionsContainer = document.getElementById('suggestions-container');
+            const searchForm = searchInput ? searchInput.closest('form') : null;
+
+            const clearSuggestions = () => {
+                if (suggestionsContainer) {
+                    suggestionsContainer.innerHTML = '';
+                }
+            };
+
         if (searchInput && suggestionsContainer) {
             let autocompleteTimeout;
 
@@ -1691,6 +1715,12 @@ export const Layout = (props: {
             const pathInfo = event.detail.pathInfo;
             const requestPath = pathInfo && pathInfo.requestPath ? pathInfo.requestPath : '';
             if (requestPath.indexOf('/api/lists/') !== -1 && requestPath.indexOf('/items') !== -1) {
+                if (event.detail.successful) {
+                    const suggestionsContainer = document.getElementById('suggestions-container');
+                    if (suggestionsContainer) {
+                        suggestionsContainer.innerHTML = '';
+                    }
+                }
                 setTimeout(updateEmptyState, 120);
             }
         });
@@ -1709,7 +1739,24 @@ export const Layout = (props: {
                 } catch (e) {
                     // Use default message
                 }
-                showNotification(message, 'error');
+                const suggestionsContainer = document.getElementById('suggestions-container');
+                if (suggestionsContainer) {
+                    // Clear active suggestions first, then show floating duplicate warning in the same area.
+                    suggestionsContainer.innerHTML = '';
+                    const errorMessage = document.createElement('div');
+                    errorMessage.className = 'suggestions-error-message';
+                    errorMessage.setAttribute('role', 'status');
+                    errorMessage.textContent = message;
+                    suggestionsContainer.appendChild(errorMessage);
+
+                    setTimeout(() => {
+                        if (suggestionsContainer.contains(errorMessage)) {
+                            suggestionsContainer.innerHTML = '';
+                        }
+                    }, 4500);
+                } else {
+                    window.showNotification(message, 'error');
+                }
                 
                 // Prevent HTMX from swapping
                 event.detail.shouldSwap = false;

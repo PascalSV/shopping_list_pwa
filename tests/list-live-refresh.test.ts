@@ -8,7 +8,7 @@ describe('List Name Live Refresh Markup', () => {
     const deviceA = {
         id: uuidv4(),
         headers: {
-            'Authorization': 'Bearer device_a_token',
+            'Cookie': 'shopping_auth=pascal123',
             'Content-Type': 'application/json'
         }
     };
@@ -16,7 +16,7 @@ describe('List Name Live Refresh Markup', () => {
     const deviceB = {
         id: uuidv4(),
         headers: {
-            'Authorization': 'Bearer device_b_token',
+            'Cookie': 'shopping_auth=pascal123',
             'Content-Type': 'application/json'
         }
     };

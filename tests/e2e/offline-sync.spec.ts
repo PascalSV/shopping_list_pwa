@@ -6,7 +6,7 @@ test.use({ serviceWorkers: 'allow' });
 test('device works offline and syncs when back online', async ({ browser, request }) => {
     // Clean up any existing data
     const cleanupHeaders = {
-        Authorization: 'Bearer offline_test_device_a',
+        'Cookie': 'shopping_auth=pascal123',
         'Content-Type': 'application/json'
     };
 
@@ -17,12 +17,11 @@ test('device works offline and syncs when back online', async ({ browser, reques
     }
 
     // Create two device contexts
-    const contextA = await browser.newContext({
-        extraHTTPHeaders: { Authorization: 'Bearer offline_test_device_a' }
-    });
-    const contextB = await browser.newContext({
-        extraHTTPHeaders: { Authorization: 'Bearer offline_test_device_b' }
-    });
+    const contextA = await browser.newContext();
+    await contextA.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
+
+    const contextB = await browser.newContext();
+    await contextB.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
 
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();
@@ -242,7 +241,7 @@ test('device works offline and syncs when back online', async ({ browser, reques
 test('device can browse and view while offline, then add items when back online', async ({ browser, request }) => {
     // Clean up
     const cleanupHeaders = {
-        Authorization: 'Bearer offline_test_device_c',
+        'Cookie': 'shopping_auth=pascal123',
         'Content-Type': 'application/json'
     };
 
@@ -252,12 +251,11 @@ test('device can browse and view while offline, then add items when back online'
         await request.delete('/api/lists/' + list.id, { headers: cleanupHeaders });
     }
 
-    const contextA = await browser.newContext({
-        extraHTTPHeaders: { Authorization: 'Bearer offline_test_device_c' }
-    });
-    const contextB = await browser.newContext({
-        extraHTTPHeaders: { Authorization: 'Bearer offline_test_device_d' }
-    });
+    const contextA = await browser.newContext();
+    await contextA.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
+
+    const contextB = await browser.newContext();
+    await contextB.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
 
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();

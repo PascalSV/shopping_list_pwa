@@ -4,7 +4,7 @@ test.use({ serviceWorkers: 'block' });
 
 test('item remark added and changed is reflected on second device', async ({ browser, request }) => {
     const cleanupHeaders = {
-        Authorization: 'Bearer device_e_token',
+        'Cookie': 'shopping_auth=pascal123',
         'Content-Type': 'application/json'
     };
 
@@ -14,12 +14,11 @@ test('item remark added and changed is reflected on second device', async ({ bro
         await request.delete('/api/lists/' + list.id, { headers: cleanupHeaders });
     }
 
-    const contextA = await browser.newContext({
-        extraHTTPHeaders: { Authorization: 'Bearer device_e_token' }
-    });
-    const contextB = await browser.newContext({
-        extraHTTPHeaders: { Authorization: 'Bearer device_f_token' }
-    });
+    const contextA = await browser.newContext();
+    await contextA.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
+
+    const contextB = await browser.newContext();
+    await contextB.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
 
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();

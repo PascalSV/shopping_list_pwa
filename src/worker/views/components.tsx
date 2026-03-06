@@ -103,7 +103,7 @@ export const ListView = (props: {
                 hx-target="body"
                 hx-swap="innerHTML"
             >
-                My lists
+                < Lists
             </button>
             <h2 id="current-list-title" class="list-title" data-list-id="${props.listId}">${props.listName}</h2>
         </div>
@@ -441,7 +441,6 @@ export const EditItemForm = (props: {
                     class="btn btn-danger"
                     hx-delete="/api/lists/${props.listId}/items/${props.itemId}"
                     hx-swap="none"
-                    hx-confirm="Delete this item?"
                     hx-on::after-settle="if(event.detail.xhr.status === 200) { document.querySelector('.form-container')?.remove(); window.location.href = '/list/${props.listId}'; }"
                 >
                     Delete

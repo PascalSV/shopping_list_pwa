@@ -5,7 +5,7 @@ test.use({ serviceWorkers: 'block' });
 test('list content is scrollable', async ({ browser, request }) => {
     // Clean up first
     const cleanupHeaders = {
-        Authorization: 'Bearer scroll_test_device',
+        'Cookie': 'shopping_auth=pascal123',
         'Content-Type': 'application/json'
     };
 
@@ -16,9 +16,16 @@ test('list content is scrollable', async ({ browser, request }) => {
     }
 
     const context = await browser.newContext({
-        extraHTTPHeaders: { Authorization: 'Bearer scroll_test_device' },
         viewport: { width: 390, height: 844 }  // Mobile viewport
     });
+
+    // Set authentication cookie
+    await context.addCookies([{
+        name: 'shopping_auth',
+        value: 'pascal123',
+        domain: 'localhost',
+        path: '/'
+    }]);
 
     const page = await context.newPage();
     await page.goto('/');
@@ -154,7 +161,7 @@ test('list content is scrollable', async ({ browser, request }) => {
 test('scrolling does not trigger edit dialog', async ({ browser, request }) => {
     // Clean up first
     const cleanupHeaders = {
-        Authorization: 'Bearer scroll_edit_test_device',
+        'Cookie': 'shopping_auth=pascal123',
         'Content-Type': 'application/json'
     };
 
@@ -165,9 +172,16 @@ test('scrolling does not trigger edit dialog', async ({ browser, request }) => {
     }
 
     const context = await browser.newContext({
-        extraHTTPHeaders: { Authorization: 'Bearer scroll_edit_test_device' },
         viewport: { width: 390, height: 844 }
     });
+
+    // Set authentication cookie
+    await context.addCookies([{
+        name: 'shopping_auth',
+        value: 'pascal123',
+        domain: 'localhost',
+        path: '/'
+    }]);
 
     const page = await context.newPage();
     await page.goto('/');

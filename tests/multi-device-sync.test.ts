@@ -5,21 +5,19 @@ import { v4 as uuidv4 } from 'uuid';
 describe('Multi-Device List Synchronization', () => {
     let worker: UnstableDevWorker;
 
-    // Simulate two different devices with different tokens
+    // Simulate two different devices with authentication
     const deviceA = {
         id: uuidv4(),
-        token: 'device_a_token',
         headers: {
-            'Authorization': 'Bearer device_a_token',
+            'Cookie': 'shopping_auth=pascal123',
             'Content-Type': 'application/json'
         }
     };
 
     const deviceB = {
         id: uuidv4(),
-        token: 'device_b_token',
         headers: {
-            'Authorization': 'Bearer device_b_token',
+            'Cookie': 'shopping_auth=pascal123',
             'Content-Type': 'application/json'
         }
     };

@@ -5,7 +5,7 @@ test.use({ serviceWorkers: 'block' });
 test('three devices perform heavy concurrent operations with cross-device verification', async ({ browser, request }) => {
     // Clean up any existing data
     const cleanupHeaders = {
-        Authorization: 'Bearer load_test_device_a',
+        'Cookie': 'shopping_auth=pascal123',
         'Content-Type': 'application/json'
     };
 
@@ -16,15 +16,14 @@ test('three devices perform heavy concurrent operations with cross-device verifi
     }
 
     // Create three device contexts
-    const contextA = await browser.newContext({
-        extraHTTPHeaders: { Authorization: 'Bearer load_test_device_a' }
-    });
-    const contextB = await browser.newContext({
-        extraHTTPHeaders: { Authorization: 'Bearer load_test_device_b' }
-    });
-    const contextC = await browser.newContext({
-        extraHTTPHeaders: { Authorization: 'Bearer load_test_device_c' }
-    });
+    const contextA = await browser.newContext();
+    await contextA.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
+
+    const contextB = await browser.newContext();
+    await contextB.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
+
+    const contextC = await browser.newContext();
+    await contextC.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
 
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();

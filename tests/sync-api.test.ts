@@ -5,12 +5,12 @@ describe('API Sync Route', () => {
     let worker: any;
 
     const deviceAHeaders = {
-        Authorization: 'Bearer device_a_token',
+        'Cookie': 'shopping_auth=pascal123',
         'Content-Type': 'application/json'
     };
 
     const deviceBHeaders = {
-        Authorization: 'Bearer device_b_token',
+        'Cookie': 'shopping_auth=pascal123',
         'Content-Type': 'application/json'
     };
 

@@ -4,7 +4,7 @@ test.use({ serviceWorkers: 'block' });
 
 test('list rename is reflected on second device UI', async ({ browser, request }) => {
     const cleanupHeaders = {
-        Authorization: 'Bearer device_a_token',
+        'Cookie': 'shopping_auth=pascal123',
         'Content-Type': 'application/json'
     };
 
@@ -14,12 +14,11 @@ test('list rename is reflected on second device UI', async ({ browser, request }
         await request.delete('/api/lists/' + list.id, { headers: cleanupHeaders });
     }
 
-    const contextA = await browser.newContext({
-        extraHTTPHeaders: { Authorization: 'Bearer device_a_token' }
-    });
-    const contextB = await browser.newContext({
-        extraHTTPHeaders: { Authorization: 'Bearer device_b_token' }
-    });
+    const contextA = await browser.newContext();
+    await contextA.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
+
+    const contextB = await browser.newContext();
+    await contextB.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
 
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();
@@ -65,12 +64,11 @@ test('items added after rename are reflected on second device', async ({ browser
         await request.delete('/api/lists/' + list.id, { headers: cleanupHeaders });
     }
 
-    const contextA = await browser.newContext({
-        extraHTTPHeaders: { Authorization: 'Bearer device_c_token' }
-    });
-    const contextB = await browser.newContext({
-        extraHTTPHeaders: { Authorization: 'Bearer device_d_token' }
-    });
+    const contextA = await browser.newContext();
+    await contextA.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
+
+    const contextB = await browser.newContext();
+    await contextB.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
 
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();
