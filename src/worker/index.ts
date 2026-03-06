@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import type { HonoContext } from './types';
 import { listsRoutes } from './routes/lists';
 import { itemsRoutes } from './routes/items';
@@ -7,18 +8,84 @@ import { autocompleteRoutes } from './routes/autocomplete';
 import { adminRoutes } from './routes/admin';
 import * as db from './db';
 import { Layout } from './views/layout';
-import { ListView, CreateListForm, EditListForm, EditItemForm, ListsManagementView } from './views/components';
+import { ListView, CreateListForm, EditListForm, EditItemForm, ListsManagementView, LoginForm } from './views/components';
 
 const app = new Hono<HonoContext>();
 
-// Default auth token for web app
-const DEFAULT_TOKEN = 'default_token';
+const SESSION_COOKIE = 'shopping_auth';
 
-// Authentication middleware - for both API and page routes
+type AppUser = 'PascalSV' | 'ClaudiaSV';
+
+const resolveUserBySecret = (secret: string, c: any): AppUser | null => {
+    if (secret === c.env.PASCAL_PASS) {
+        return 'PascalSV';
+    }
+
+    if (secret === c.env.CLAUDIA_PASS) {
+        return 'ClaudiaSV';
+    }
+
+    return null;
+};
+
+const resolveUserFromRequest = (c: any): AppUser | null => {
+    const authHeader = c.req.header('Authorization');
+    const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice('Bearer '.length).trim() : '';
+
+    if (bearerToken) {
+        const authUser = resolveUserBySecret(bearerToken, c);
+        if (authUser) {
+            return authUser;
+        }
+    }
+
+    const sessionSecret = getCookie(c, SESSION_COOKIE) || '';
+    if (sessionSecret) {
+        return resolveUserBySecret(sessionSecret, c);
+    }
+
+    return null;
+};
+
+const isPublicPath = (path: string): boolean => {
+    if (path === '/login') {
+        return true;
+    }
+
+    if (path === '/logout') {
+        return true;
+    }
+
+    if (path.includes('.') || path.startsWith('/icons/') || path.startsWith('/fonts/')) {
+        return true;
+    }
+
+    return false;
+};
+
+// Authentication middleware - protect app and API routes
 app.use('*', async (c, next) => {
-    // Get token from Authorization header or use default
-    const token = c.req.header('Authorization')?.replace('Bearer ', '') || DEFAULT_TOKEN;
-    c.set('deviceId', token);
+    const path = c.req.path;
+    const user = resolveUserFromRequest(c);
+
+    if (path === '/login' && user) {
+        return c.redirect('/lists', 302);
+    }
+
+    if (isPublicPath(path)) {
+        await next();
+        return;
+    }
+
+    if (!user) {
+        if (path.startsWith('/api/')) {
+            return c.json({ error: 'Unauthorized' }, 401);
+        }
+
+        return c.redirect('/login', 302);
+    }
+
+    c.set('deviceId', user);
     await next();
 });
 
@@ -28,6 +95,56 @@ app.route('/api', itemsRoutes);
 app.route('/api', syncRoutes);
 app.route('/api', autocompleteRoutes);
 app.route('/api', adminRoutes);
+
+// Login Routes
+app.get('/login', async (c) => {
+    const error = c.req.query('error');
+    return c.html(
+        Layout({
+            title: 'Login',
+            lists: [],
+            children: LoginForm({ error })
+        })
+    );
+});
+
+app.post('/login', async (c) => {
+    const formData = await c.req.formData();
+    const username = String(formData.get('username') || '');
+    const providedPassword = String(formData.get('password') || '').trim();
+
+    if (!providedPassword || (username !== 'PascalSV' && username !== 'ClaudiaSV')) {
+        return c.redirect('/login?error=missing', 302);
+    }
+
+    const expectedPassword = username === 'PascalSV' ? c.env.PASCAL_PASS : c.env.CLAUDIA_PASS;
+
+    if (providedPassword !== expectedPassword) {
+        return c.redirect('/login?error=invalid', 302);
+    }
+
+    setCookie(c, SESSION_COOKIE, expectedPassword, {
+        httpOnly: true,
+        secure: c.req.url.startsWith('https://'),
+        sameSite: 'Lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 30
+    });
+
+    return c.redirect('/lists', 302);
+});
+
+app.post('/logout', async (c) => {
+    deleteCookie(c, SESSION_COOKIE, { path: '/' });
+    return c.redirect('/login', 302);
+});
+
+app.get('/logout', async (c) => {
+    deleteCookie(c, SESSION_COOKIE, { path: '/' });
+    return c.redirect('/login', 302);
+});
+
+
 
 // Page Routes
 app.get('/', async (c) => {

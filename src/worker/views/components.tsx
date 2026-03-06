@@ -1,6 +1,58 @@
 import { html } from 'hono/html';
 import type { ShoppingItem, ShoppingList } from '../types';
 
+export const LoginForm = (props: {
+    error?: string;
+}) => {
+    let errorMessage = '';
+    if (props.error === 'invalid') {
+        errorMessage = 'Invalid username or password';
+    } else if (props.error === 'missing') {
+        errorMessage = 'Please enter both username and password';
+    } else if (props.error === 'server') {
+        errorMessage = 'Server error. Please try again.';
+    }
+
+    return html`
+    <div style="max-width: 460px; margin: 2rem auto;">
+        <div style="margin-bottom: 1.2rem; text-align: center;">
+            <h2 style="font-size: 1.7rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.35rem;">Secure Login</h2>
+            <p style="color: var(--text-secondary);">Sign in with your assigned credentials.</p>
+        </div>
+
+        <div class="form-container" style="position: static; transform: none; margin: 0; width: 100%; max-width: 100%; backdrop-filter: blur(18px) saturate(150%); -webkit-backdrop-filter: blur(18px) saturate(150%);">
+            <form method="post" action="/login">
+                ${errorMessage ? html`<div style="margin-bottom: 0.9rem; padding: 0.65rem 0.8rem; border-radius: 0.65rem; background: rgba(255, 69, 58, 0.12); border: 1px solid rgba(255, 69, 58, 0.35); color: #8a1e1a; font-weight: 600; font-size: 0.92rem;">${errorMessage}</div>` : ''}
+
+                <div class="form-group">
+                    <label for="username">User</label>
+                    <select id="username" name="username" required>
+                        <option value="PascalSV">PascalSV</option>
+                        <option value="ClaudiaSV">ClaudiaSV</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                        autocomplete="current-password"
+                        placeholder="Enter your password"
+                    />
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Sign In
+                </button>
+            </form>
+        </div>
+    </div>
+`;
+};
+
 export const ListItemRow = (item: ShoppingItem, listId: string) => html`
     <div class="item ${item.completed ? 'completed' : ''} ${item.remark ? '' : 'no-remark'}" data-item-id="${item.id}" data-list-id="${listId}" data-item-name="${item.name}">
         <div class="item-content">
@@ -42,17 +94,22 @@ export const ListsManagementView = (props: {
     <div class="lists-management">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
             <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">Your Lists</h2>
-            <button 
-                class="btn btn-primary"
-                hx-get="/list/create"
-                hx-target="body"
-                hx-swap="beforeend"
-            >
-                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                New List
-            </button>
+            <div style="display: flex; gap: 0.55rem; align-items: center;">
+                <a href="/logout" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center;">
+                    Logout
+                </a>
+                <button 
+                    class="btn btn-primary"
+                    hx-get="/list/create"
+                    hx-target="body"
+                    hx-swap="beforeend"
+                >
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    New List
+                </button>
+            </div>
         </div>
 
         ${props.lists.length === 0 ? html`

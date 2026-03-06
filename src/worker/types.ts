@@ -2,13 +2,15 @@ import type { D1Database } from '@cloudflare/workers-types';
 
 export type Env = {
     DB: D1Database;
-    SHOPPING_LIST_TOKEN: string;
+    PASCAL_PASS: string;
+    CLAUDIA_PASS: string;
 };
 
 export type HonoContext = {
     Bindings: Env;
     Variables: {
         deviceId: string;
+        username?: string;
     };
 };
 

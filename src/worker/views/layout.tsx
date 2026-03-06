@@ -901,7 +901,8 @@ export const Layout = (props: {
             font-size: 0.95rem;
         }
 
-        .form-group input {
+        .form-group input,
+        .form-group select {
             width: 100%;
             padding: 0.875rem 1.125rem;
             border: 1px solid rgba(255, 255, 255, 0.7);
@@ -914,7 +915,8 @@ export const Layout = (props: {
             -webkit-backdrop-filter: blur(10px) saturate(150%);
         }
 
-        .form-group input:focus {
+        .form-group input:focus,
+        .form-group select:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.17);
@@ -1000,9 +1002,37 @@ export const Layout = (props: {
             width: 16px;
             height: 16px;
         }
+
+        .logout-btn {
+            position: fixed;
+            top: calc(env(safe-area-inset-top, 0px) + 0.75rem);
+            right: 0.75rem;
+            z-index: 100;
+            padding: 0.5rem 0.85rem;
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            color: var(--text-secondary);
+            font-weight: 600;
+            opacity: 0.85;
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
+    <form method="post" action="/logout" style="position: fixed; top: calc(env(safe-area-inset-top, 0px) + 0.75rem); right: 0.75rem; z-index: 100;">
+        <button type="submit" class="btn btn-secondary logout-btn">
+            Sign Out
+        </button>
+    </form>
     <div id="offline-badge" class="offline-badge">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="1" y1="1" x2="23" y2="23"></line>

@@ -7,3 +7,7 @@ assets = { directory = "public" }
 binding = "DB"
 database_name = "shopping_list_db"
 database_id = "aaac8ead-9b94-4c5c-982e-209bd6e4fa2e"
+
+# Secrets (configured via wrangler secret put)
+# PASCAL_PASS - Password for PascalSV user
+# CLAUDIA_PASS - Password for ClaudiaSV user
