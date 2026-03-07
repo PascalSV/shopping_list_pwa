@@ -292,9 +292,19 @@ export const Layout = (props: {
             flex: 1;
             min-height: 0;
             overflow-y: auto;
+            overflow-x: hidden;
+            overscroll-behavior: contain;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
             padding: 1.5rem;
             padding-bottom: 1rem;
             background: white;
+        }
+
+        .content::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none;
         }
 
         /* Footer Styles */
@@ -586,7 +596,7 @@ export const Layout = (props: {
             right: 0;
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
+            justify-content: flex-start;
             gap: 0.5rem;
             padding: 0 0.5rem;
             background: transparent;
@@ -597,7 +607,15 @@ export const Layout = (props: {
             -webkit-backdrop-filter: none;
             max-height: 200px;
             overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
             z-index: 60;
+        }
+
+        .suggestions-container::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none;
         }
 
         .suggestions-container:empty {
@@ -606,21 +624,22 @@ export const Layout = (props: {
 
         .suggestion-btn {
             padding: 0.5rem 1rem;
-            background: linear-gradient(135deg, rgba(10, 132, 255, 0.88) 0%, rgba(90, 200, 250, 0.8) 100%);
+            background: #6b6b6b;
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.7);
+            border: 1px solid white;
             border-radius: var(--radius-lg);
             font-size: 0.875rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
             white-space: nowrap;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.48), 0 10px 20px rgba(7, 46, 83, 0.16);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .suggestion-btn:hover {
             transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            background: #7b7b7b;
         }
 
         .suggestion-btn:active {
@@ -644,8 +663,8 @@ export const Layout = (props: {
         }
 
         .btn-icon-clear:hover {
-            border-color: var(--primary);
-            color: var(--primary);
+            border-color: white;
+            color: white;
             transform: translateY(-1px);
             box-shadow: var(--shadow-md);
         }
@@ -1466,36 +1485,35 @@ export const Layout = (props: {
         const initializeListToolbar = () => {
             const toolbar = document.getElementById('list-toolbar');
             const toolbarTitle = document.getElementById('toolbar-title');
-            const scrollingTitle = document.getElementById('scrolling-title');
+            const content = document.getElementById('content');
             
-            if (!toolbar || !toolbarTitle || !scrollingTitle) {
+            if (!toolbar || !toolbarTitle || !content) {
                 return;
             }
 
-            // Disconnect previous observer if exists
-            if (window.listTitleObserver) {
-                window.listTitleObserver.disconnect();
+            // Clean up previous listeners before rebinding after HTMX swaps
+            if (window.listToolbarCleanup) {
+                window.listToolbarCleanup();
             }
 
-            // Create intersection observer
-            window.listTitleObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    // Show toolbar title when scrolling title is NOT fully visible
-                    if (entry.intersectionRatio < 1) {
-                        // Scrolling title is partially hidden or not visible
-                        toolbarTitle.style.display = 'block';
-                        toolbar.classList.add('compact');
-                    } else {
-                        // Scrolling title is fully visible
-                        toolbarTitle.style.display = 'none';
-                        toolbar.classList.remove('compact');
-                    }
-                });
-            }, {
-                threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-            });
+            const showToolbarTitleAtScrollTopPx = 12;
 
-            window.listTitleObserver.observe(scrollingTitle);
+            const updateToolbarState = () => {
+                // Reveal compact title shortly after user starts scrolling.
+                const shouldShowToolbarTitle = content.scrollTop >= showToolbarTitleAtScrollTopPx;
+                toolbarTitle.style.display = shouldShowToolbarTitle ? 'block' : 'none';
+                toolbar.classList.toggle('compact', shouldShowToolbarTitle);
+            };
+
+            content.addEventListener('scroll', updateToolbarState, { passive: true });
+            window.addEventListener('resize', updateToolbarState);
+
+            window.listToolbarCleanup = () => {
+                content.removeEventListener('scroll', updateToolbarState);
+                window.removeEventListener('resize', updateToolbarState);
+            };
+
+            updateToolbarState();
         };
 
         const initializeItemInteractions = (item) => {
