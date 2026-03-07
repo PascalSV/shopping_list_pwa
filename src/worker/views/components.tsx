@@ -16,14 +16,14 @@ export const LoginForm = (props: {
     return html`
     <div style="max-width: 420px; margin: 4rem auto; padding: 0 1rem;">
         <div style="margin-bottom: 2rem; text-align: center;">
-            <img src="/icons/icon-192.png" alt="Shopping List" style="width: 96px; height: 96px; margin: 0 auto 1.5rem; display: block; border-radius: 20px; box-shadow: 0 8px 24px rgba(10, 33, 63, 0.15);" />
+            <img src="/icons/icon-192.png" alt="Shopping List" style="width: 96px; height: 96px; margin: 0 auto 1.5rem; display: block; border-radius: 20px; box-shadow: var(--shadow-lg);" />
             <h2 style="font-size: 2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">Shopping List</h2>
             <p style="color: var(--text-secondary); font-size: 0.95rem;">Sign in to access your lists</p>
         </div>
 
-        <div style="background: linear-gradient(145deg, rgba(255, 255, 255, 0.55) 0%, rgba(232, 243, 255, 0.45) 100%); padding: 2rem; border-radius: var(--radius-xl); box-shadow: var(--shadow-xl); border: 1px solid var(--border-strong); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);">
+        <div style="background: var(--bg-primary); padding: 2rem; border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); border: 1px solid var(--border);">
             <form method="post" action="/login">
-                ${errorMessage ? html`<div style="margin-bottom: 0.9rem; padding: 0.65rem 0.8rem; border-radius: 0.65rem; background: rgba(255, 69, 58, 0.12); border: 1px solid rgba(255, 69, 58, 0.35); color: #8a1e1a; font-weight: 600; font-size: 0.92rem;">${errorMessage}</div>` : ''}
+                ${errorMessage ? html`<div style="margin-bottom: 0.9rem; padding: 0.65rem 0.8rem; border-radius: 0.65rem; background: #FFEBEE; border: 1px solid var(--error); color: #c62828; font-weight: 600; font-size: 0.92rem;">${errorMessage}</div>` : ''}
 
                 <div class="form-group">
                     <label for="username">User</label>
@@ -48,7 +48,7 @@ export const LoginForm = (props: {
                         <button
                             type="button"
                             id="togglePassword"
-                            style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; padding: 0.5rem; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.2rem; transition: all 0.3s ease; opacity: 0.8; hover:opacity: 1;"
+                            style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; padding: 0.5rem; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.2rem; transition: all 0.1s ease;"
                             tabindex="-1"
                         >
                             <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -142,7 +142,7 @@ export const ListsManagementView = (props: {
             ` : html`
                 <div class="lists-grid" id="lists-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
                     ${props.lists.map(list => html`
-                        <div class="list-card" data-list-id="${list.id}" style="background: linear-gradient(145deg, rgba(255, 255, 255, 0.55) 0%, rgba(232, 243, 255, 0.45) 100%); padding: 1.5rem; border-radius: var(--radius-xl); box-shadow: var(--shadow-md); border: 1px solid var(--border-strong); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; position: relative;">
+                        <div class="list-card" data-list-id="${list.id}" style="background: var(--bg-primary); padding: 1.5rem; border-radius: var(--radius-xl); box-shadow: var(--shadow-md); border: 1px solid var(--border); cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; position: relative;">
                             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
                                 <h3 class="list-name" style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0; flex: 1; word-break: break-word; cursor: pointer;">${list.name}</h3>
                                 <div style="display: flex; gap: 0.5rem; opacity: 0.7;">

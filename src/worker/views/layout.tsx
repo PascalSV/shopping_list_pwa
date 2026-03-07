@@ -12,7 +12,7 @@ export const Layout = (props: {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0a84ff" />
+    <meta name="theme-color" content="#FF6969" />
     <meta name="description" content="Offline-first shopping list PWA" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,32 +25,26 @@ export const Layout = (props: {
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <style>
         :root {
-            --primary: #0a84ff;
-            --primary-dark: #0068d8;
-            --primary-light: #5ac8fa;
-            --secondary: #64d2ff;
-            --danger: #ff453a;
-            --warning: #ff9f0a;
-            --success: #32d74b;
-            --bg-primary: rgba(255, 255, 255, 0.56);
-            --bg-secondary: rgba(246, 250, 255, 0.52);
-            --bg-tertiary: rgba(226, 236, 248, 0.58);
-            --bg-page-top: #c9dcff;
-            --bg-page-bottom: #f1f7ff;
-            --text-primary: #102340;
-            --text-secondary: #2a4668;
-            --text-tertiary: #5f7a9a;
-            --border: rgba(255, 255, 255, 0.62);
-            --border-strong: rgba(255, 255, 255, 0.78);
-            --shadow-sm: 0 8px 18px rgba(10, 33, 63, 0.09);
-            --shadow-md: 0 14px 30px rgba(10, 33, 63, 0.14);
-            --shadow-lg: 0 24px 48px rgba(10, 33, 63, 0.17);
-            --shadow-xl: 0 38px 72px rgba(10, 33, 63, 0.2);
+            --primary: #FF6969;
+            --secondary: #CCCCCC;
+            --error: #F44336;
+            --warning: #FF9800;
+            --success: #4CAF50;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F5F5F5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --text-tertiary: #999999;
+            --border: #E0E0E0;
+            --border-strong: #E0E0E0;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.14);
+            --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.15);
             --radius-sm: 0.375rem;
             --radius-md: 0.5rem;
             --radius-lg: 0.75rem;
             --radius-xl: 1rem;
-            --glass-blur: blur(24px) saturate(170%);
         }
 
         * {
@@ -61,10 +55,7 @@ export const Layout = (props: {
 
         body {
             font-family: 'SF Pro Display', 'D-DIN', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background:
-                radial-gradient(140% 90% at 12% 8%, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 60%),
-                radial-gradient(120% 80% at 88% 0%, rgba(99, 181, 255, 0.35) 0%, rgba(99, 181, 255, 0) 62%),
-                linear-gradient(172deg, var(--bg-page-top) 0%, var(--bg-page-bottom) 50%, #eaf3ff 100%);
+            background: var(--bg-secondary);
             color: var(--text-primary);
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
@@ -76,49 +67,7 @@ export const Layout = (props: {
             overflow-y: hidden;
         }
 
-        body::before,
-        body::after {
-            content: '';
-            position: fixed;
-            border-radius: 999px;
-            pointer-events: none;
-            filter: blur(2px);
-            z-index: 0;
-        }
 
-        body::before {
-            width: 360px;
-            height: 360px;
-            top: -120px;
-            left: -80px;
-            background: radial-gradient(circle at 40% 35%, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 72%);
-        }
-
-        body::after {
-            width: 420px;
-            height: 420px;
-            right: -160px;
-            bottom: -130px;
-            background: radial-gradient(circle at 45% 50%, rgba(95, 188, 255, 0.3) 0%, rgba(95, 188, 255, 0) 70%);
-        }
-
-        /* Blurry status bar for iOS PWAs */
-        @supports (padding: env(safe-area-inset-top)) {
-            body::before {
-                width: 100%;
-                height: env(safe-area-inset-top);
-                top: 0;
-                left: 0;
-                right: 0;
-                background: transparent;
-                border-radius: 0;
-                filter: none;
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
-                mask: linear-gradient(to bottom, black, black 50%, rgba(0, 0, 0, 0.7) 75%, rgba(0, 0, 0, 0) 100%);
-                z-index: 2;
-            }
-        }
 
         .container {
             max-width: 720px;
@@ -128,37 +77,23 @@ export const Layout = (props: {
             min-height: 100vh;
             height: 100dvh;
             max-height: 100dvh;
-            background: linear-gradient(140deg, rgba(255, 255, 255, 0.42) 0%, rgba(232, 243, 255, 0.4) 100%);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border-left: 1px solid var(--border-strong);
-            border-right: 1px solid var(--border-strong);
-            box-shadow: var(--shadow-xl);
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            box-shadow: var(--shadow-md);
             position: relative;
             z-index: 1;
             overflow: hidden;
             padding-top: env(safe-area-inset-top);
         }
 
-        .container::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            height: 1px;
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.82) 50%, rgba(255, 255, 255, 0) 100%);
-            z-index: 2;
-            pointer-events: none;
-        }
-
         /* Header Styles */
         .header {
-            background: white;
+            background: var(--bg-primary);
             color: var(--text-primary);
             padding: 0.5rem 1.5rem;
-            box-shadow: none;
-            border-bottom: none;
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -188,9 +123,9 @@ export const Layout = (props: {
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, rgba(10, 132, 255, 0.18) 0%, rgba(90, 200, 250, 0.14) 100%);
+            background: var(--primary);
             border: none;
-            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4), 0 8px 14px rgba(13, 33, 54, 0.1);
+            box-shadow: var(--shadow-sm);
             padding: 0;
         }
 
@@ -199,17 +134,18 @@ export const Layout = (props: {
             height: 24px;
             border-radius: 0;
             display: block;
+            filter: brightness(0) invert(1);
         }
 
         .btn {
             font-family: 'D-DIN', sans-serif;
             padding: 0.45rem 0.85rem;
-            border: 1px solid var(--border-strong);
+            border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             cursor: pointer;
             font-weight: 600;
             font-size: 0.85rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+            transition: transform 0.1s ease, background 0.1s ease;
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
@@ -217,62 +153,38 @@ export const Layout = (props: {
             white-space: nowrap;
             line-height: 1;
             min-height: 34px;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), var(--shadow-sm);
-            backdrop-filter: blur(14px) saturate(150%);
-            -webkit-backdrop-filter: blur(14px) saturate(150%);
+            box-shadow: var(--shadow-sm);
             position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 46%;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.52) 0%, rgba(255, 255, 255, 0) 100%);
-            pointer-events: none;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, rgba(10, 132, 255, 0.82) 0%, rgba(90, 200, 250, 0.72) 100%);
+            background: var(--primary);
             color: white;
-            border-color: rgba(255, 255, 255, 0.6);
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, rgba(0, 104, 216, 0.92) 0%, rgba(10, 132, 255, 0.84) 100%);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
         }
 
         .btn-primary:active {
-            transform: translateY(0);
+            opacity: 0.85;
         }
 
         .btn-secondary {
-            background: #cccccc;
+            background: var(--secondary);
             color: var(--text-primary);
-            border: 1px solid var(--border-strong);
+            border: 1px solid var(--border);
         }
 
-        .btn-secondary:hover {
-            background: #bbbbbb;
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
+        .btn-secondary:active {
+            opacity: 0.85;
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, rgba(255, 105, 97, 0.85) 0%, rgba(255, 69, 58, 0.82) 100%);
+            background: var(--error);
             color: white;
-            border-color: rgba(255, 255, 255, 0.58);
+            border-color: var(--error);
         }
 
-        .btn-danger:hover {
-            background: linear-gradient(135deg, rgba(255, 69, 58, 0.94) 0%, rgba(209, 48, 39, 0.9) 100%);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
+        .btn-danger:active {
+            opacity: 0.85;
         }
 
         .btn-icon {
@@ -298,7 +210,7 @@ export const Layout = (props: {
             -ms-overflow-style: none;
             padding: 1.5rem;
             padding-bottom: 1rem;
-            background: white;
+            background: var(--bg-secondary);
         }
 
         .content::-webkit-scrollbar {
@@ -329,9 +241,9 @@ export const Layout = (props: {
         }
 
         .container.has-search .footer {
-            background: #cccccc;
-            border-top: 1px solid rgba(255, 255, 255, 0.58);
-            box-shadow: 0 -10px 24px rgba(10, 33, 63, 0.08);
+            background: var(--secondary);
+            border-top: 1px solid var(--border);
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
         }
 
         /* Items List */
@@ -360,7 +272,7 @@ export const Layout = (props: {
             margin-right: -1.5rem;
             margin-bottom: 0.75rem;
             padding: 0.2rem 1.5rem 0.75rem;
-            background: white;
+            background: var(--bg-primary);
             transition: gap 0.18s ease, padding 0.18s ease;
         }
 
@@ -407,11 +319,11 @@ export const Layout = (props: {
             display: flex;
             gap: 0.75rem;
             padding: 0.85rem 1rem;
-            background: #FF6969;
+            background: var(--primary);
             border-radius: 0;
             align-items: center;
             box-shadow: var(--shadow-sm);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: none;
             transition: all 0.2s ease;
             position: relative;
             cursor: pointer;
@@ -446,15 +358,13 @@ export const Layout = (props: {
             height: 100%;
         }
 
-        .item:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
-            border-color: rgba(255, 255, 255, 0.6);
+        .item:active {
+            opacity: 0.9;
         }
 
         .item.completed {
-            background: #FF6969;
-            opacity: 0.82;
+            background: var(--primary);
+            opacity: 0.75;
         }
 
         .item-name {
@@ -467,7 +377,7 @@ export const Layout = (props: {
 
         .item-remark {
             font-size: 0.92rem;
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.95);
             display: block;
             width: 100%;
             overflow: hidden;
@@ -483,13 +393,11 @@ export const Layout = (props: {
         .add-item-form {
             display: flex;
             gap: 0.75rem;
-            background: linear-gradient(140deg, rgba(255, 255, 255, 0.5) 0%, rgba(229, 241, 255, 0.46) 100%);
+            background: var(--bg-secondary);
             padding: 1.25rem;
             border-radius: var(--radius-xl);
             box-shadow: var(--shadow-md);
-            border: 1px solid var(--border-strong);
-            backdrop-filter: blur(20px) saturate(170%);
-            -webkit-backdrop-filter: blur(20px) saturate(170%);
+            border: 1px solid var(--border);
             flex-wrap: wrap;
             flex: none;
         }
@@ -498,22 +406,19 @@ export const Layout = (props: {
             flex: 1;
             min-width: 200px;
             padding: 0.875rem 1.125rem;
-            border: 1px solid rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             font-size: 1rem;
             font-family: inherit;
             transition: all 0.2s ease;
-            background: rgba(255, 255, 255, 0.36);
+            background: var(--bg-primary);
             color: var(--text-primary);
-            backdrop-filter: blur(10px) saturate(145%);
-            -webkit-backdrop-filter: blur(10px) saturate(145%);
         }
 
         .add-item-form input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.18);
-            background: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 0 0 3px rgba(255, 105, 105, 0.2);
         }
 
         .add-item-form input::placeholder {
@@ -530,7 +435,7 @@ export const Layout = (props: {
         .search-form {
             display: flex;
             gap: 0.4rem;
-            background: white;
+            background: var(--bg-primary);
             border-radius: var(--radius-xl);
             padding: 0.35rem;
             border: 1px solid var(--border);
@@ -545,15 +450,13 @@ export const Layout = (props: {
             margin-bottom: 0;
             padding: 0 1rem;
             border-radius: var(--radius-lg);
-            color: #8a140a;
+            color: #c62828;
             font-size: 0.9rem;
             font-weight: 600;
             letter-spacing: 0.01em;
-            border: 1px solid transparent;
-            background: linear-gradient(130deg, rgba(255, 108, 96, 0.12) 0%, rgba(255, 72, 56, 0.08) 100%);
-            backdrop-filter: blur(18px) saturate(185%);
-            -webkit-backdrop-filter: blur(18px) saturate(185%);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 8px 24px rgba(172, 36, 20, 0.14);
+            border: 1px solid var(--error);
+            background: #FFEBEE;
+            box-shadow: var(--shadow-sm);
             transition: max-height 0.28s ease, opacity 0.22s ease, transform 0.22s ease, margin-bottom 0.22s ease, padding 0.22s ease;
         }
 
@@ -563,26 +466,25 @@ export const Layout = (props: {
             transform: translateY(0);
             margin-bottom: 0.65rem;
             padding: 0.7rem 1rem;
-            border-color: rgba(202, 37, 19, 0.34);
         }
 
         .search-form input {
             flex: 1;
             min-width: 0;
             padding: 0.5rem 0.85rem;
-            border: 1px solid rgba(255, 255, 255, 0.42);
+            border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             font-size: 1rem;
             font-family: inherit;
             transition: all 0.2s ease;
-            background: rgba(255, 255, 255, 0.2);
+            background: var(--bg-primary);
             color: var(--text-primary);
         }
 
         .search-form input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.14);
+            box-shadow: 0 0 0 3px rgba(255, 105, 105, 0.2);
         }
 
         .search-form input::placeholder {
@@ -624,26 +526,20 @@ export const Layout = (props: {
 
         .suggestion-btn {
             padding: 0.5rem 1rem;
-            background: #6b6b6b;
+            background: var(--text-secondary);
             color: white;
-            border: 1px solid white;
+            border: 1px solid var(--text-secondary);
             border-radius: var(--radius-lg);
             font-size: 0.875rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
             white-space: nowrap;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .suggestion-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            background: #7b7b7b;
+            box-shadow: var(--shadow-sm);
         }
 
         .suggestion-btn:active {
-            transform: translateY(0);
+            opacity: 0.85;
         }
 
         .btn-icon-clear {
@@ -651,22 +547,19 @@ export const Layout = (props: {
             width: 36px;
             height: 36px;
             border-radius: var(--radius-lg);
-            border: 1px solid var(--border-strong);
-            background: #cccccc;
+            border: 1px solid var(--border);
+            background: var(--secondary);
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--text-secondary);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), var(--shadow-sm);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
         }
 
-        .btn-icon-clear:hover {
-            border-color: white;
-            color: white;
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
+        .btn-icon-clear:active {
+            opacity: 0.85;
         }
 
         .btn-icon-clear svg {
@@ -684,24 +577,22 @@ export const Layout = (props: {
             border-radius: var(--radius-lg);
             color: white;
             max-width: 360px;
-            box-shadow: var(--shadow-xl);
+            box-shadow: var(--shadow-lg);
             animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(18px) saturate(165%);
-            -webkit-backdrop-filter: blur(18px) saturate(165%);
-            border: 1px solid rgba(255, 255, 255, 0.42);
+            border: none;
             z-index: 1000;
         }
 
         .notification.success {
-            background: linear-gradient(135deg, var(--success) 0%, var(--primary-dark) 100%);
+            background: var(--success);
         }
 
         .notification.error {
-            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            background: var(--error);
         }
 
         .notification.info {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: var(--primary);
         }
 
         @keyframes slideIn {
@@ -721,11 +612,9 @@ export const Layout = (props: {
             padding: 4rem 2rem;
             color: var(--text-secondary);
             font-size: 1.125rem;
-            background: rgba(255, 255, 255, 0.3);
+            background: var(--bg-secondary);
             border-radius: var(--radius-xl);
             border: 1px solid var(--border);
-            backdrop-filter: blur(16px) saturate(165%);
-            -webkit-backdrop-filter: blur(16px) saturate(165%);
         }
 
         .empty-state svg {
@@ -741,7 +630,7 @@ export const Layout = (props: {
             top: 1rem;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(255, 159, 10, 0.88);
+            background: var(--warning);
             color: white;
             padding: 0.5rem 1rem;
             border-radius: var(--radius-md);
@@ -752,9 +641,7 @@ export const Layout = (props: {
             display: none;
             align-items: center;
             gap: 0.5rem;
-            border: 1px solid rgba(255, 224, 179, 0.65);
-            backdrop-filter: blur(10px) saturate(170%);
-            -webkit-backdrop-filter: blur(10px) saturate(170%);
+            border: none;
         }
 
         .offline-badge.visible {
@@ -911,21 +798,17 @@ export const Layout = (props: {
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.4);
             z-index: 200;
             pointer-events: auto;
         }
 
         .form-container > form {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.55) 0%, rgba(232, 243, 255, 0.45) 100%);
+            background: var(--bg-primary);
             padding: 2rem;
             border-radius: var(--radius-xl);
             box-shadow: var(--shadow-xl);
-            border: 1px solid var(--border-strong);
-            backdrop-filter: blur(24px) saturate(180%);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--border);
             max-width: 480px;
             width: 90%;
             z-index: 201;
@@ -956,22 +839,20 @@ export const Layout = (props: {
         .form-group select {
             width: 100%;
             padding: 0.875rem 1.125rem;
-            border: 1px solid rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             font-size: 1rem;
             font-family: inherit;
             transition: all 0.2s ease;
-            background: rgba(255, 255, 255, 0.34);
-            backdrop-filter: blur(10px) saturate(150%);
-            -webkit-backdrop-filter: blur(10px) saturate(150%);
+            background: var(--bg-primary);
+            color: var(--text-primary);
         }
 
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.17);
-            background: rgba(255, 255, 255, 0.62);
+            box-shadow: 0 0 0 3px rgba(255, 105, 105, 0.2);
         }
 
         .form-actions {
@@ -998,8 +879,8 @@ export const Layout = (props: {
         }
 
         .list-row {
-            background: linear-gradient(140deg, rgba(255, 255, 255, 0.56) 0%, rgba(234, 245, 255, 0.44) 100%);
-            border: 1px solid var(--border-strong);
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
             border-radius: var(--radius-xl);
             padding: 1rem 1.1rem;
             box-shadow: var(--shadow-sm);
@@ -1009,14 +890,10 @@ export const Layout = (props: {
             justify-content: space-between;
             cursor: pointer;
             user-select: none;
-            backdrop-filter: blur(16px) saturate(155%);
-            -webkit-backdrop-filter: blur(16px) saturate(155%);
         }
 
-        .list-row:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
-            border-color: rgba(113, 186, 255, 0.95);
+        .list-row:active {
+            opacity: 0.9;
         }
 
         .list-row-content {
@@ -1038,7 +915,6 @@ export const Layout = (props: {
             font-size: 1.35rem;
             line-height: 1;
             margin-left: 0.75rem;
-            text-shadow: 0 6px 16px rgba(13, 53, 99, 0.18);
         }
 
         .btn-sm {
