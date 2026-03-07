@@ -161,9 +161,9 @@ export const Layout = (props: {
         }
 
         .btn-primary {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
+            background: var(--secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
         }
 
         .btn-primary:active {
@@ -433,12 +433,8 @@ export const Layout = (props: {
         /* Search Form in Footer */
 
         .search-form {
-            display: flex;
-            gap: 0.4rem;
-            background: var(--bg-primary);
-            border-radius: var(--radius-xl);
-            padding: 0.35rem;
-            border: 1px solid var(--border);
+            position: relative;
+            width: 100%;
         }
 
         .inline-error-banner {
@@ -469,9 +465,9 @@ export const Layout = (props: {
         }
 
         .search-form input {
-            flex: 1;
-            min-width: 0;
+            width: 100%;
             padding: 0.5rem 0.85rem;
+            padding-right: 2.6rem;
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             font-size: 1rem;
@@ -543,19 +539,23 @@ export const Layout = (props: {
         }
 
         .btn-icon-clear {
+            position: absolute;
+            top: 50%;
+            right: 0.3rem;
+            transform: translateY(-50%);
             padding: 0.5rem;
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: var(--radius-lg);
-            border: 1px solid var(--border);
-            background: var(--secondary);
+            border: none;
+            background: transparent;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.1s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--text-primary);
-            box-shadow: var(--shadow-sm);
+            color: var(--text-secondary);
+            box-shadow: none;
         }
 
         .btn-icon-clear:active {
@@ -563,8 +563,8 @@ export const Layout = (props: {
         }
 
         .btn-icon-clear svg {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             stroke-width: 2;
         }
 
