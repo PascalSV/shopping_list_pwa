@@ -260,19 +260,16 @@ export const Layout = (props: {
         }
 
         .list-toolbar {
-            position: sticky;
-            top: 0;
+            position: relative;
             z-index: 35;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
             gap: 0.75rem;
-            margin-top: -1.5rem;
-            margin-left: -1.5rem;
-            margin-right: -1.5rem;
-            margin-bottom: 0.75rem;
-            padding: 0.2rem 1.5rem 0.75rem;
-            background: var(--bg-primary);
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background: transparent;
             transition: gap 0.18s ease, padding 0.18s ease;
         }
 
@@ -295,7 +292,7 @@ export const Layout = (props: {
             flex-direction: row;
             align-items: center;
             gap: 0.6rem;
-            padding: 0.2rem 1.5rem 0.6rem;
+            padding: 0;
         }
 
         .list-toolbar.compact .list-title {
@@ -945,6 +942,21 @@ export const Layout = (props: {
         <span>Offline Mode</span>
     </div>
     <div class="container ${props.currentListId ? 'has-search' : ''}">
+        ${props.currentListId ? html`
+        <div class="header">
+            <div id="list-toolbar" class="list-toolbar">
+                <button 
+                    class="btn btn-secondary list-back-btn"
+                    hx-get="/lists"
+                    hx-target="body"
+                    hx-swap="innerHTML"
+                >
+                    My Lists
+                </button>
+                <h2 id="toolbar-title" class="list-title" style="display: none;" data-list-id="${props.currentListId}">${props.title}</h2>
+            </div>
+        </div>
+        ` : ''}
 
         <div class="content" id="content">
             ${props.children}
@@ -1362,6 +1374,7 @@ export const Layout = (props: {
             const toolbar = document.getElementById('list-toolbar');
             const toolbarTitle = document.getElementById('toolbar-title');
             const content = document.getElementById('content');
+            const scrollingTitle = document.getElementById('scrolling-title');
             
             if (!toolbar || !toolbarTitle || !content) {
                 return;
@@ -1375,8 +1388,13 @@ export const Layout = (props: {
             const showToolbarTitleAtScrollTopPx = 12;
 
             const updateToolbarState = () => {
-                // Reveal compact title shortly after user starts scrolling.
-                const shouldShowToolbarTitle = content.scrollTop >= showToolbarTitleAtScrollTopPx;
+                // Reveal compact title once the large in-content title scrolls away.
+                let shouldShowToolbarTitle = content.scrollTop >= showToolbarTitleAtScrollTopPx;
+                if (scrollingTitle) {
+                    const contentTop = content.getBoundingClientRect().top;
+                    const titleBottom = scrollingTitle.getBoundingClientRect().bottom;
+                    shouldShowToolbarTitle = titleBottom <= contentTop + 8;
+                }
                 toolbarTitle.style.display = shouldShowToolbarTitle ? 'block' : 'none';
                 toolbar.classList.toggle('compact', shouldShowToolbarTitle);
             };

@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
+import { getCookie, setCookie } from 'hono/cookie';
 import type { HonoContext } from './types';
 import { listsRoutes } from './routes/lists';
 import { itemsRoutes } from './routes/items';
