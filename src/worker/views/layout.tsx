@@ -1264,6 +1264,12 @@ export const Layout = (props: {
                     const match = lists.find(list => list.id === titleListId);
                     if (match && typeof match.name === 'string') {
                         currentTitle.textContent = match.name;
+                        
+                        // Also update the visible scrolling title
+                        const scrollingTitle = document.getElementById('scrolling-title');
+                        if (scrollingTitle) {
+                            scrollingTitle.textContent = match.name;
+                        }
                     }
                 } catch (err) {
                     console.error('List title refresh failed:', err);

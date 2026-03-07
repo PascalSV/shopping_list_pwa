@@ -101,6 +101,7 @@ export const ListView = (props: {
 }) => html`
     <div class="list-view">
         <h2 id="scrolling-title" class="scrolling-list-title" data-list-id="${props.listId}">${props.listName}</h2>
+        <span id="current-list-title" data-list-id="${props.listId}" style="display: none;">${props.listName}</span>
 
         ${props.items.length === 0 ? html`<div id="empty-message" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1rem; color: var(--text-secondary); text-align: center;">${t(props.locale, 'You have no more items to shop - well done!', 'Du hast keine Eintraege mehr auf der Liste - gut gemacht!')}</div>` : ''}
 

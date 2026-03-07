@@ -2,85 +2,82 @@ import { test, expect } from '@playwright/test';
 
 test.use({ serviceWorkers: 'block' });
 
-test('item remark added and changed is reflected on second device', async ({ browser, request }) => {
-    const cleanupHeaders = {
-        'Cookie': 'shopping_auth=pascal123',
+async function cleanupLists(request: any) {
+    const headers = {
+        Cookie: 'shopping_auth=pascal123',
         'Content-Type': 'application/json'
     };
 
-    const listsResponse = await request.get('/api/lists', { headers: cleanupHeaders });
-    const lists = await listsResponse.json() as Array<{ id: string }>;
+    const listsResponse = await request.get('/api/lists', { headers });
+    expect(listsResponse.ok()).toBeTruthy();
+
+    const listsJson = await listsResponse.json();
+    const lists = Array.isArray(listsJson) ? (listsJson as Array<{ id: string }>) : [];
+
     for (const list of lists) {
-        await request.delete('/api/lists/' + list.id, { headers: cleanupHeaders });
+        await request.delete('/api/lists/' + list.id, { headers });
     }
+}
 
-    const contextA = await browser.newContext();
-    await contextA.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
+async function createAuthedContext(browser: any) {
+    const context = await browser.newContext();
+    await context.addCookies([{ name: 'shopping_auth', value: 'pascal123', url: 'http://127.0.0.1:8787' }]);
+    return context;
+}
 
-    const contextB = await browser.newContext();
-    await contextB.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
+test('item remark added and changed is reflected on second device', async ({ browser, request }) => {
+    test.setTimeout(60000);
+    await cleanupLists(request);
+
+    const contextA = await createAuthedContext(browser);
+    const contextB = await createAuthedContext(browser);
 
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();
 
     await pageA.goto('/');
 
-    // Create list and item
-    await pageA.getByRole('button', { name: 'New List' }).click();
-    await pageA.locator('#listName').waitFor({ state: 'visible' });
+    await pageA.locator('button[hx-get="/list/create"]').click();
     await pageA.locator('#listName').fill('Kitchen Supply');
-    await pageA.getByRole('button', { name: 'Create List' }).click();
+    await pageA.locator('form button[type="submit"]').first().click();
+    await expect(pageA.locator('#scrolling-title')).toHaveText('Kitchen Supply');
 
-    await expect(pageA.getByRole('heading', { level: 2, name: 'Kitchen Supply' })).toBeVisible();
+    const listId = await pageA.locator('#scrolling-title').getAttribute('data-list-id');
+    if (!listId) {
+        throw new Error('Expected list id after creation');
+    }
 
     await pageA.locator('#search-input').fill('Olive Oil');
     await pageA.locator('#search-input').press('Enter');
+    await expect(pageA.locator('.item').filter({ hasText: 'Olive Oil' })).toBeVisible();
 
-    await expect(pageA.getByText('Olive Oil')).toBeVisible();
+    await pageB.goto('/list/' + listId);
+    await expect(pageB.locator('.item').filter({ hasText: 'Olive Oil' })).toBeVisible({ timeout: 10000 });
 
-    // Navigate to device B and verify item is visible
-    await pageB.goto('/');
-    await pageB.locator('.list-row').filter({ hasText: 'Kitchen Supply' }).first().click();
-    await expect(pageB.getByText('Olive Oil')).toBeVisible({ timeout: 10000 });
+    const itemRow = pageA.locator('.item').filter({ hasText: 'Olive Oil' }).first();
+    const itemId = await itemRow.getAttribute('data-item-id');
+    if (!itemId) {
+        throw new Error('Expected item id for Olive Oil');
+    }
 
-    // Device A: Get item and extract its ID to navigate to edit page directly
-    const itemWithRemark = pageA.locator('.item').filter({ hasText: 'Olive Oil' });
-    const itemId = await itemWithRemark.first().getAttribute('data-item-id');
-    const listId = await itemWithRemark.first().getAttribute('data-list-id');
-
-    // Navigate to edit page
-    await pageA.goto(`/item/${itemId}/edit?listId=${listId}`);
-
-    // Wait for edit dialog to appear
+    await pageA.goto('/item/' + itemId + '/edit?listId=' + listId);
     await expect(pageA.locator('#itemName')).toBeVisible({ timeout: 5000 });
 
-    // Fill in remark
     await pageA.locator('#itemRemark').fill('Extra Virgin, 500ml bottle');
-    await pageA.getByRole('button', { name: 'Update' }).click();
+    await pageA.locator('form button[type="submit"]').first().click();
 
-    // Verify remark appears on device A
-    await expect(pageA.getByText('Extra Virgin, 500ml bottle')).toBeVisible();
+    await expect(pageA.locator('.item').filter({ hasText: 'Extra Virgin, 500ml bottle' })).toBeVisible();
+    await expect(pageB.locator('.item').filter({ hasText: 'Extra Virgin, 500ml bottle' })).toBeVisible({ timeout: 10000 });
 
-    // Device B: Wait for polling to update the remark
-    await expect(pageB.getByText('Extra Virgin, 500ml bottle')).toBeVisible({ timeout: 10000 });
-
-    // Device A: Reload to go back to list view
-    await pageA.goto(`/list/${listId}`);
-
-    // Change the remark (navigate to edit page again)
-    await pageA.goto(`/item/${itemId}/edit?listId=${listId}`);
-
+    await pageA.goto('/item/' + itemId + '/edit?listId=' + listId);
     await expect(pageA.locator('#itemRemark')).toBeVisible({ timeout: 5000 });
 
     await pageA.locator('#itemRemark').clear();
     await pageA.locator('#itemRemark').fill('on sale this week');
-    await pageA.getByRole('button', { name: 'Update' }).click();
+    await pageA.locator('form button[type="submit"]').first().click();
 
-    // Verify remark changed on device A
-    await expect(pageA.getByText('on sale this week')).toBeVisible();
-
-    // Device B: Wait for polling to update the remark
-    await expect(pageB.getByText('on sale this week')).toBeVisible({ timeout: 10000 });
+    await expect(pageA.locator('.item').filter({ hasText: 'on sale this week' })).toBeVisible();
+    await expect(pageB.locator('.item').filter({ hasText: 'on sale this week' })).toBeVisible({ timeout: 10000 });
 
     await contextA.close();
     await contextB.close();

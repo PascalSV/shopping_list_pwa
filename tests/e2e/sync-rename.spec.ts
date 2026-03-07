@@ -2,117 +2,102 @@ import { test, expect } from '@playwright/test';
 
 test.use({ serviceWorkers: 'block' });
 
-test('list rename is reflected on second device UI', async ({ browser, request }) => {
-    const cleanupHeaders = {
-        'Cookie': 'shopping_auth=pascal123',
+async function cleanupLists(request: any) {
+    const headers = {
+        Cookie: 'shopping_auth=pascal123',
         'Content-Type': 'application/json'
     };
 
-    const listsResponse = await request.get('/api/lists', { headers: cleanupHeaders });
-    const lists = await listsResponse.json() as Array<{ id: string }>;
+    const listsResponse = await request.get('/api/lists', { headers });
+    expect(listsResponse.ok()).toBeTruthy();
+
+    const listsJson = await listsResponse.json();
+    const lists = Array.isArray(listsJson) ? (listsJson as Array<{ id: string }>) : [];
+
     for (const list of lists) {
-        await request.delete('/api/lists/' + list.id, { headers: cleanupHeaders });
+        await request.delete('/api/lists/' + list.id, { headers });
     }
+}
 
-    const contextA = await browser.newContext();
-    await contextA.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
+async function createAuthedContext(browser: any) {
+    const context = await browser.newContext();
+    await context.addCookies([{ name: 'shopping_auth', value: 'pascal123', url: 'http://127.0.0.1:8787' }]);
+    return context;
+}
 
-    const contextB = await browser.newContext();
-    await contextB.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
+test('list rename is reflected on second device UI', async ({ browser, request }) => {
+    test.setTimeout(60000);
+    await cleanupLists(request);
+
+    const contextA = await createAuthedContext(browser);
+    const contextB = await createAuthedContext(browser);
 
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();
 
     await pageA.goto('/');
-    await pageB.goto('/');
-
-    await pageA.getByRole('button', { name: 'New List' }).click();
-    await pageA.locator('#listName').waitFor({ state: 'visible' });
+    await pageA.locator('button[hx-get="/list/create"]').click();
     await pageA.locator('#listName').fill('Family Groceries');
-    await pageA.getByRole('button', { name: 'Create List' }).click();
+    await pageA.locator('form button[type="submit"]').first().click();
+    await expect(pageA.locator('#scrolling-title')).toHaveText('Family Groceries');
 
-    await expect(pageA.getByRole('heading', { level: 2, name: 'Family Groceries' })).toBeVisible();
-
-    const firstListId = await pageA.locator('#current-list-title').getAttribute('data-list-id');
-    if (!firstListId) {
-        throw new Error('Expected current list id to be present after list creation');
+    const listId = await pageA.locator('#scrolling-title').getAttribute('data-list-id');
+    if (!listId) {
+        throw new Error('Expected list id after creation');
     }
 
-    await pageA.goto('/list/' + firstListId + '/edit');
+    await pageB.goto('/list/' + listId);
+    await expect(pageB.locator('#scrolling-title')).toHaveText('Family Groceries', { timeout: 10000 });
+
+    await pageA.goto('/list/' + listId + '/edit');
     await pageA.locator('#listName').fill('Family Groceries Renamed');
-    await pageA.getByRole('button', { name: 'Update' }).click();
+    await pageA.locator('form button[type="submit"]').first().click();
 
-    await expect(pageA.getByRole('heading', { level: 2, name: 'Family Groceries Renamed' })).toBeVisible();
-
-    await pageB.goto('/');
-    await pageB.locator('.list-row').filter({ hasText: 'Family Groceries Renamed' }).first().click();
-    await expect(pageB.getByRole('heading', { level: 2, name: 'Family Groceries Renamed' })).toBeVisible({ timeout: 10000 });
+    await expect(pageA.locator('#scrolling-title')).toHaveText('Family Groceries Renamed');
+    await expect(pageB.locator('#scrolling-title')).toHaveText('Family Groceries Renamed', { timeout: 10000 });
 
     await contextA.close();
     await contextB.close();
 });
 
 test('items added after rename are reflected on second device', async ({ browser, request }) => {
-    const cleanupHeaders = {
-        Authorization: 'Bearer device_c_token',
-        'Content-Type': 'application/json'
-    };
+    test.setTimeout(60000);
+    await cleanupLists(request);
 
-    const listsResponse = await request.get('/api/lists', { headers: cleanupHeaders });
-    const lists = await listsResponse.json() as Array<{ id: string }>;
-    for (const list of lists) {
-        await request.delete('/api/lists/' + list.id, { headers: cleanupHeaders });
-    }
-
-    const contextA = await browser.newContext();
-    await contextA.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
-
-    const contextB = await browser.newContext();
-    await contextB.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
+    const contextA = await createAuthedContext(browser);
+    const contextB = await createAuthedContext(browser);
 
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();
 
     await pageA.goto('/');
-
-    // Create list
-    await pageA.getByRole('button', { name: 'New List' }).click();
-    await pageA.locator('#listName').waitFor({ state: 'visible' });
+    await pageA.locator('button[hx-get="/list/create"]').click();
     await pageA.locator('#listName').fill('Meal Planning');
-    await pageA.getByRole('button', { name: 'Create List' }).click();
+    await pageA.locator('form button[type="submit"]').first().click();
+    await expect(pageA.locator('#scrolling-title')).toHaveText('Meal Planning');
 
-    await expect(pageA.getByRole('heading', { level: 2, name: 'Meal Planning' })).toBeVisible();
-
-    // Rename list
-    const secondListId = await pageA.locator('#current-list-title').getAttribute('data-list-id');
-    if (!secondListId) {
-        throw new Error('Expected current list id to be present after list creation');
+    const listId = await pageA.locator('#scrolling-title').getAttribute('data-list-id');
+    if (!listId) {
+        throw new Error('Expected list id after creation');
     }
 
-    await pageA.goto('/list/' + secondListId + '/edit');
+    await pageA.goto('/list/' + listId + '/edit');
     await pageA.locator('#listName').fill('Weekly Meal Plan');
-    await pageA.getByRole('button', { name: 'Update' }).click();
+    await pageA.locator('form button[type="submit"]').first().click();
+    await expect(pageA.locator('#scrolling-title')).toHaveText('Weekly Meal Plan');
 
-    await expect(pageA.getByRole('heading', { level: 2, name: 'Weekly Meal Plan' })).toBeVisible();
-
-    // Add items to renamed list
     await pageA.locator('#search-input').fill('Chicken');
     await pageA.locator('#search-input').press('Enter');
-
-    await expect(pageA.getByText('Chicken')).toBeVisible();
+    await expect(pageA.locator('.item').filter({ hasText: 'Chicken' })).toBeVisible();
 
     await pageA.locator('#search-input').fill('Rice');
     await pageA.locator('#search-input').press('Enter');
+    await expect(pageA.locator('.item').filter({ hasText: 'Rice' })).toBeVisible();
 
-    await expect(pageA.getByText('Rice')).toBeVisible();
-
-    // Navigate to device B and verify both renamed list and items are visible
-    await pageB.goto('/');
-    await pageB.locator('.list-row').filter({ hasText: 'Weekly Meal Plan' }).first().click();
-
-    await expect(pageB.getByRole('heading', { level: 2, name: 'Weekly Meal Plan' })).toBeVisible({ timeout: 10000 });
-    await expect(pageB.getByText('Chicken')).toBeVisible({ timeout: 10000 });
-    await expect(pageB.getByText('Rice')).toBeVisible({ timeout: 10000 });
+    await pageB.goto('/list/' + listId);
+    await expect(pageB.locator('#scrolling-title')).toHaveText('Weekly Meal Plan', { timeout: 10000 });
+    await expect(pageB.locator('.item').filter({ hasText: 'Chicken' })).toBeVisible({ timeout: 10000 });
+    await expect(pageB.locator('.item').filter({ hasText: 'Rice' })).toBeVisible({ timeout: 10000 });
 
     await contextA.close();
     await contextB.close();

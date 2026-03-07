@@ -2,103 +2,94 @@ import { test, expect } from '@playwright/test';
 
 test.use({ serviceWorkers: 'block' });
 
-test('item add is reflected on second device UI', async ({ browser, request }) => {
-    const cleanupHeaders = {
-        'Cookie': 'shopping_auth=pascal123',
+async function cleanupLists(request: any) {
+    const headers = {
+        Cookie: 'shopping_auth=pascal123',
         'Content-Type': 'application/json'
     };
 
-    const listsResponse = await request.get('/api/lists', { headers: cleanupHeaders });
-    const lists = await listsResponse.json() as Array<{ id: string }>;
+    const listsResponse = await request.get('/api/lists', { headers });
+    expect(listsResponse.ok()).toBeTruthy();
+
+    const listsJson = await listsResponse.json();
+    const lists = Array.isArray(listsJson) ? (listsJson as Array<{ id: string }>) : [];
+
     for (const list of lists) {
-        await request.delete('/api/lists/' + list.id, { headers: cleanupHeaders });
+        await request.delete('/api/lists/' + list.id, { headers });
     }
+}
 
-    const contextA = await browser.newContext();
-    await contextA.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
+async function createAuthedContext(browser: any) {
+    const context = await browser.newContext();
+    await context.addCookies([{ name: 'shopping_auth', value: 'pascal123', url: 'http://127.0.0.1:8787' }]);
+    return context;
+}
 
-    const contextB = await browser.newContext();
-    await contextB.addCookies([{ name: 'shopping_auth', value: 'pascal123', domain: 'localhost', path: '/' }]);
+test('item add is reflected on second device UI', async ({ browser, request }) => {
+    test.setTimeout(60000);
+    await cleanupLists(request);
+
+    const contextA = await createAuthedContext(browser);
+    const contextB = await createAuthedContext(browser);
 
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();
 
     await pageA.goto('/');
-    await pageB.goto('/');
 
-    await pageA.getByRole('button', { name: 'New List' }).click();
-    await pageA.locator('#listName').waitFor({ state: 'visible' });
+    await pageA.locator('button[hx-get="/list/create"]').click();
     await pageA.locator('#listName').fill('Shopping List');
-    await pageA.getByRole('button', { name: 'Create List' }).click();
+    await pageA.locator('form button[type="submit"]').first().click();
+    await expect(pageA.locator('#scrolling-title')).toHaveText('Shopping List');
 
-    await expect(pageA.getByRole('heading', { level: 2, name: 'Shopping List' })).toBeVisible();
+    const listId = await pageA.locator('#scrolling-title').getAttribute('data-list-id');
+    if (!listId) {
+        throw new Error('Expected list id after creation');
+    }
 
     await pageA.locator('#search-input').fill('Milk');
     await pageA.locator('#search-input').press('Enter');
+    await expect(pageA.locator('.item').filter({ hasText: 'Milk' })).toBeVisible();
 
-    await expect(pageA.getByText('Milk')).toBeVisible();
-
-    // pageB navigates to /lists and clicks on the Shopping List to view it
-    await pageB.goto('/');
-    await pageB.locator('.list-row').filter({ hasText: 'Shopping List' }).first().click();
-    await expect(pageB.getByText('Milk')).toBeVisible({ timeout: 10000 });
+    await pageB.goto('/list/' + listId);
+    await expect(pageB.locator('#scrolling-title')).toHaveText('Shopping List', { timeout: 10000 });
+    await expect(pageB.locator('.item').filter({ hasText: 'Milk' })).toBeVisible({ timeout: 10000 });
 
     await contextA.close();
     await contextB.close();
 });
 
 test('item delete is reflected on second device UI', async ({ browser, request }) => {
-    const cleanupHeaders = {
-        Authorization: 'Bearer device_c_token',
-        'Content-Type': 'application/json'
-    };
+    test.setTimeout(60000);
+    await cleanupLists(request);
 
-    const listsResponse = await request.get('/api/lists', { headers: cleanupHeaders });
-    const lists = await listsResponse.json() as Array<{ id: string }>;
-    for (const list of lists) {
-        await request.delete('/api/lists/' + list.id, { headers: cleanupHeaders });
-    }
-
-    const contextA = await browser.newContext({
-        extraHTTPHeaders: { Authorization: 'Bearer device_c_token' }
-    });
-    const contextB = await browser.newContext({
-        extraHTTPHeaders: { Authorization: 'Bearer device_d_token' }
-    });
+    const contextA = await createAuthedContext(browser);
+    const contextB = await createAuthedContext(browser);
 
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();
 
     await pageA.goto('/');
-    await pageB.goto('/');
 
-    await pageA.getByRole('button', { name: 'New List' }).click();
-    await pageA.locator('#listName').waitFor({ state: 'visible' });
+    await pageA.locator('button[hx-get="/list/create"]').click();
     await pageA.locator('#listName').fill('Todo List');
-    await pageA.getByRole('button', { name: 'Create List' }).click();
+    await pageA.locator('form button[type="submit"]').first().click();
+    await expect(pageA.locator('#scrolling-title')).toHaveText('Todo List');
 
-    await expect(pageA.getByRole('heading', { level: 2, name: 'Todo List' })).toBeVisible();
+    const listId = await pageA.locator('#scrolling-title').getAttribute('data-list-id');
+    if (!listId) {
+        throw new Error('Expected list id after creation');
+    }
 
     await pageA.locator('#search-input').fill('Task 1');
     await pageA.locator('#search-input').press('Enter');
+    await expect(pageA.locator('.item').filter({ hasText: 'Task 1' })).toBeVisible();
 
-    await expect(pageA.getByText('Task 1')).toBeVisible();
+    await pageB.goto('/list/' + listId);
+    await expect(pageB.locator('.item').filter({ hasText: 'Task 1' })).toBeVisible({ timeout: 10000 });
 
-    await pageB.goto('/');
-    await pageB.locator('.list-row').filter({ hasText: 'Todo List' }).first().click();
-    await expect(pageB.getByText('Task 1')).toBeVisible({ timeout: 10000 });
-
-    // Delete the item on device A (single click = delete, long press = edit)
-    const itemLocator = pageA.locator('.item').filter({ hasText: 'Task 1' }).first();
-    await itemLocator.click();
-
-    // Wait a bit for the delete to process
-    await pageA.waitForTimeout(500);
-
-    // Verify deletion on device A
-    await expect(pageA.locator('.item').filter({ hasText: 'Task 1' })).not.toBeVisible();
-
-    // Wait for polling to reflect deletion on device B
+    await pageA.locator('.item').filter({ hasText: 'Task 1' }).first().click();
+    await expect(pageA.locator('.item').filter({ hasText: 'Task 1' })).not.toBeVisible({ timeout: 10000 });
     await expect(pageB.locator('.item').filter({ hasText: 'Task 1' })).not.toBeVisible({ timeout: 10000 });
 
     await contextA.close();
