@@ -1011,6 +1011,7 @@ export const Layout = (props: {
     </div>
 
     <script>
+        (() => {
         const isGerman = (document.documentElement.lang || '').toLowerCase().startsWith('de');
         const tr = (de, en) => (isGerman ? de : en);
 
@@ -1743,6 +1744,7 @@ export const Layout = (props: {
                 window.history.back();
             }
         }, true);
+        })();
     </script>
 </body>
 </html>`;
