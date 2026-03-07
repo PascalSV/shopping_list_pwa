@@ -1,5 +1,5 @@
 // Enhanced service worker for offline support
-const CACHE_NAME = 'shoplist-v2';
+const CACHE_NAME = 'pascals-shoplist-v3';
 const urlsToCache = [
     '/',
     '/manifest.json',
@@ -75,6 +75,24 @@ self.addEventListener('fetch', event => {
                     }
                 );
             })
+        );
+        return;
+    }
+
+    // Always prefer a fresh manifest so home-screen name updates are picked up.
+    if (url.pathname === '/manifest.json') {
+        event.respondWith(
+            fetch(request)
+                .then(response => {
+                    if (response.status === 200) {
+                        const responseToCache = response.clone();
+                        caches.open(CACHE_NAME).then(cache => {
+                            cache.put(request, responseToCache);
+                        });
+                    }
+                    return response;
+                })
+                .catch(() => caches.match(request))
         );
         return;
     }

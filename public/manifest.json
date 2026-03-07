@@ -1,6 +1,6 @@
 {
     "name": "Pascals Shopping List",
-    "short_name": "Pascals List",
+    "short_name": "Pascals Shopping List",
     "description": "Pascals Shopping List with offline-first multi-device sync",
     "start_url": "/",
     "display": "standalone",

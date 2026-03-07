@@ -17,8 +17,10 @@ export const Layout = (props: {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#FF6969" />
     <meta name="description" content="${t(props.locale, 'Pascals Shopping List: Offline-first shopping list PWA', 'Pascals Einkaufsliste: Offline-faehige Einkaufsliste als PWA')}" />
+    <meta name="application-name" content="${t(props.locale, 'Pascals Shopping List', 'Pascals Einkaufsliste')}" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="${t(props.locale, 'Pascals Shopping List', 'Pascals Einkaufsliste')}" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>${props.title}</title>
     <link rel="manifest" href="/manifest.json" />
@@ -48,6 +50,39 @@ export const Layout = (props: {
             --radius-md: 0.5rem;
             --radius-lg: 0.75rem;
             --radius-xl: 1rem;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                color-scheme: dark;
+                --primary: #FF6969;
+                --secondary: #2E2E2E;
+                --error: #FF6B6B;
+                --warning: #FFB74D;
+                --success: #66BB6A;
+                --bg-primary: #181818;
+                --bg-secondary: #101010;
+                --text-primary: #F5F5F5;
+                --text-secondary: #C2C2C2;
+                --text-tertiary: #8E8E8E;
+                --border: #2A2A2A;
+                --border-strong: #3A3A3A;
+                --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
+                --shadow-md: 0 6px 14px rgba(0, 0, 0, 0.4);
+                --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.45);
+                --shadow-xl: 0 16px 28px rgba(0, 0, 0, 0.5);
+            }
+
+            .inline-error-banner {
+                background: #3A1F23;
+                color: #FFB3B3;
+            }
+
+            .suggestion-btn {
+                background: #3A3A3A;
+                color: var(--text-primary);
+                border-color: #444444;
+            }
         }
 
         * {
