@@ -14,7 +14,7 @@ export const Layout = (props: {
 <html lang="${props.locale}">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#FF6969" />
     <meta name="description" content="${t(props.locale, 'Pascals Shopping List: Offline-first shopping list PWA', 'Pascals Einkaufsliste: Offline-faehige Einkaufsliste als PWA')}" />
     <meta name="application-name" content="${t(props.locale, 'Pascals Shopping List', 'Pascals Einkaufsliste')}" />
@@ -264,8 +264,10 @@ export const Layout = (props: {
             margin: 0 auto;
             width: 100%;
             flex-shrink: 0;
-            padding: 0.65rem;
+            padding-top: 0.65rem;
+            padding-right: calc(0.65rem + env(safe-area-inset-right));
             padding-bottom: calc(0.65rem + env(safe-area-inset-bottom));
+            padding-left: calc(0.65rem + env(safe-area-inset-left));
             background: transparent;
             backdrop-filter: none;
             -webkit-backdrop-filter: none;
