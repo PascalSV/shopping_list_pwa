@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { getCookie, setCookie } from 'hono/cookie';
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import type { HonoContext } from './types';
 import { listsRoutes } from './routes/lists';
 import { itemsRoutes } from './routes/items';
@@ -7,6 +7,7 @@ import { syncRoutes } from './routes/sync';
 import { autocompleteRoutes } from './routes/autocomplete';
 import { adminRoutes } from './routes/admin';
 import * as db from './db';
+import { resolveLocale, t } from './i18n';
 import { Layout } from './views/layout';
 import { ListView, CreateListForm, EditListForm, EditItemForm, ListsManagementView, LoginForm } from './views/components';
 
@@ -50,7 +51,7 @@ const resolveUserFromRequest = (c: any): AppUser | null => {
 };
 
 const isPublicPath = (path: string): boolean => {
-    if (path === '/login') {
+    if (path === '/login' || path === '/logout') {
         return true;
     }
 
@@ -96,12 +97,14 @@ app.route('/api', adminRoutes);
 
 // Login Routes
 app.get('/login', async (c) => {
+    const locale = resolveLocale(c.req.header('Accept-Language'));
     const error = c.req.query('error');
     return c.html(
         Layout({
-            title: 'Login',
+            title: t(locale, 'Pascals Shopping List - Login', 'Pascals Einkaufsliste - Anmeldung'),
+            locale,
             lists: [],
-            children: LoginForm({ error })
+            children: LoginForm({ error, locale })
         })
     );
 });
@@ -132,6 +135,11 @@ app.post('/login', async (c) => {
     return c.redirect('/lists', 302);
 });
 
+app.get('/logout', async (c) => {
+    deleteCookie(c, SESSION_COOKIE, { path: '/' });
+    return c.redirect('/login', 302);
+});
+
 // Page Routes
 app.get('/', async (c) => {
     // Redirect home to lists management page
@@ -139,47 +147,53 @@ app.get('/', async (c) => {
 });
 
 app.get('/lists', async (c) => {
+    const locale = resolveLocale(c.req.header('Accept-Language'));
     try {
         const lists = await db.getAllLists(c.env.DB);
         return c.html(
             Layout({
-                title: 'Your Lists',
+                title: t(locale, 'Pascals Shopping List - Your Lists', 'Pascals Einkaufsliste - Deine Listen'),
+                locale,
                 lists,
                 children: ListsManagementView({
-                    lists
+                    lists,
+                    locale
                 })
             })
         );
     } catch (err) {
         console.error('Error loading lists:', err);
-        return c.text('Error loading page', 500);
+        return c.text(t(locale, 'Error loading page', 'Fehler beim Laden der Seite'), 500);
     }
 });
 
 app.get('/list/create', async (c) => {
+    const locale = resolveLocale(c.req.header('Accept-Language'));
     try {
         const lists = await db.getAllLists(c.env.DB);
         const isHtmx = c.req.header('HX-Request') === 'true';
 
         if (isHtmx) {
             // For HTMX requests, return just the form without Layout
-            return c.html(CreateListForm());
+            return c.html(CreateListForm({ locale }));
         }
 
         return c.html(
             Layout({
-                title: 'Create List',
+                title: t(locale, 'Pascals Shopping List - Create List', 'Pascals Einkaufsliste - Liste erstellen'),
+                locale,
                 lists,
-                children: CreateListForm()
+                children: CreateListForm({ locale })
             })
         );
     } catch (err) {
         console.error('Error loading create form:', err);
-        return c.text('Error loading form', 500);
+        return c.text(t(locale, 'Error loading form', 'Fehler beim Laden des Formulars'), 500);
     }
 });
 
 app.get('/list/:listId', async (c) => {
+    const locale = resolveLocale(c.req.header('Accept-Language'));
     try {
         const listId = c.req.param('listId');
         const lists = await db.getAllLists(c.env.DB);
@@ -197,23 +211,26 @@ app.get('/list/:listId', async (c) => {
 
         return c.html(
             Layout({
-                title: list.name,
+                title: `${list.name}`,
+                locale,
                 lists,
                 currentListId: listId,
                 children: ListView({
                     listId,
                     listName: list.name,
-                    items
+                    items,
+                    locale
                 })
             })
         );
     } catch (err) {
         console.error('Error loading list:', err);
-        return c.text('Error loading list', 500);
+        return c.text(t(locale, 'Error loading list', 'Fehler beim Laden der Liste'), 500);
     }
 });
 
 app.get('/list/:listId/edit', async (c) => {
+    const locale = resolveLocale(c.req.header('Accept-Language'));
     try {
         const listId = c.req.param('listId');
         const lists = await db.getAllLists(c.env.DB);
@@ -232,42 +249,46 @@ app.get('/list/:listId/edit', async (c) => {
             // For HTMX requests, return just the form without Layout
             return c.html(EditListForm({
                 listId,
-                listName: list.name
+                listName: list.name,
+                locale
             }));
         }
 
         return c.html(
             Layout({
-                title: 'Edit List',
+                title: t(locale, 'Pascals Shopping List - Edit List', 'Pascals Einkaufsliste - Liste bearbeiten'),
+                locale,
                 lists,
                 currentListId: listId,
                 children: EditListForm({
                     listId,
-                    listName: list.name
+                    listName: list.name,
+                    locale
                 })
             })
         );
     } catch (err) {
         console.error('Error loading edit form:', err);
-        return c.text('Error loading form', 500);
+        return c.text(t(locale, 'Error loading form', 'Fehler beim Laden des Formulars'), 500);
     }
 });
 
 app.get('/item/:itemId/edit', async (c) => {
+    const locale = resolveLocale(c.req.header('Accept-Language'));
     try {
         const itemId = c.req.param('itemId');
         const listId = c.req.query('listId');
         const isHtmx = c.req.header('HX-Request') === 'true';
 
         if (!listId) {
-            return c.text('List ID required', 400);
+            return c.text(t(locale, 'List ID required', 'Listen-ID erforderlich'), 400);
         }
 
         const lists = await db.getAllLists(c.env.DB);
         const item = await db.getItem(c.env.DB, itemId);
 
         if (!item) {
-            return c.text('Item not found', 404);
+            return c.text(t(locale, 'Item not found', 'Eintrag nicht gefunden'), 404);
         }
 
         if (isHtmx) {
@@ -276,26 +297,29 @@ app.get('/item/:itemId/edit', async (c) => {
                 itemId,
                 listId,
                 name: item.name,
-                remark: item.remark
+                remark: item.remark,
+                locale
             }));
         }
 
         return c.html(
             Layout({
-                title: 'Edit Item',
+                title: t(locale, 'Pascals Shopping List - Edit Item', 'Pascals Einkaufsliste - Eintrag bearbeiten'),
+                locale,
                 lists,
                 currentListId: listId,
                 children: EditItemForm({
                     itemId,
                     listId,
                     name: item.name,
-                    remark: item.remark
+                    remark: item.remark,
+                    locale
                 })
             })
         );
     } catch (err) {
         console.error('Error loading item edit form:', err);
-        return c.text('Error loading form', 500);
+        return c.text(t(locale, 'Error loading form', 'Fehler beim Laden des Formulars'), 500);
     }
 });
 

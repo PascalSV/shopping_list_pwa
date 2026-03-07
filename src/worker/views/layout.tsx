@@ -1,19 +1,22 @@
 import { HtmlEscapedString, html } from 'hono/html';
-import type { ShoppingList, ShoppingItem } from '../types';
+import type { ShoppingList } from '../types';
+import type { Locale } from '../i18n';
+import { t } from '../i18n';
 import { SearchForm } from './components';
 
 export const Layout = (props: {
     title: string;
+    locale: Locale;
     lists: ShoppingList[];
     currentListId?: string;
     children: HtmlEscapedString;
 }) => html`<!DOCTYPE html>
-<html lang="en">
+<html lang="${props.locale}">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#FF6969" />
-    <meta name="description" content="Offline-first shopping list PWA" />
+    <meta name="description" content="${t(props.locale, 'Pascals Shopping List: Offline-first shopping list PWA', 'Pascals Einkaufsliste: Offline-faehige Einkaufsliste als PWA')}" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -939,7 +942,7 @@ export const Layout = (props: {
             <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
             <line x1="12" y1="20" x2="12.01" y2="20"></line>
         </svg>
-        <span>Offline Mode</span>
+        <span>${t(props.locale, 'Offline Mode', 'Offline-Modus')}</span>
     </div>
     <div class="container ${props.currentListId ? 'has-search' : ''}">
         ${props.currentListId ? html`
@@ -951,7 +954,7 @@ export const Layout = (props: {
                     hx-target="body"
                     hx-swap="innerHTML"
                 >
-                    My Lists
+                    ${t(props.locale, 'My Lists', 'Meine Listen')}
                 </button>
                 <h2 id="toolbar-title" class="list-title" style="display: none;" data-list-id="${props.currentListId}">${props.title}</h2>
             </div>
@@ -965,12 +968,15 @@ export const Layout = (props: {
         <div class="footer">
             ${props.currentListId ? html`
                 <div id="inline-error-banner" class="inline-error-banner" role="status" aria-live="polite"></div>
-                ${SearchForm({ listId: props.currentListId })}
+                ${SearchForm({ listId: props.currentListId, locale: props.locale })}
             ` : ''}
         </div>
     </div>
 
     <script>
+        const isGerman = (document.documentElement.lang || '').toLowerCase().startsWith('de');
+        const tr = (de, en) => (isGerman ? de : en);
+
         // === Offline Queue System ===
         // Only initialize once per session to avoid redeclaration errors
         if (typeof window.offlineQueueInitialized === 'undefined') {
@@ -1087,7 +1093,7 @@ export const Layout = (props: {
 
                 // Reload the page to show updated data
                 if (failedOperations.length < queue.length) {
-                    showNotification('Offline changes synced successfully', 'success');
+                    showNotification(tr('Offline-Aenderungen erfolgreich synchronisiert', 'Offline changes synced successfully'), 'success');
                     setTimeout(() => {
                         window.location.reload();
                     }, 1000);
@@ -1137,7 +1143,7 @@ export const Layout = (props: {
                     });
 
                     console.log('Queued failed offline DELETE:', path);
-                    showNotification("Operation queued for when you're back online", 'info');
+                    showNotification(tr('Aktion gespeichert, sobald du wieder online bist', "Operation queued for when you're back online"), 'info');
                 }
                 // Queue PUT/PATCH requests (updates)
                 else if (verb === 'PUT' || verb === 'PATCH') {
@@ -1149,7 +1155,7 @@ export const Layout = (props: {
                     });
 
                     console.log('Queued failed offline', verb + ':', path);
-                    showNotification("Changes saved locally and will sync when online", 'info');
+                    showNotification(tr('Aenderungen lokal gespeichert und werden online synchronisiert', 'Changes saved locally and will sync when online'), 'info');
                     
                     // Store the update locally for immediate UI feedback
                     if (path.includes('/lists/') && parameters && parameters.name) {
@@ -1166,7 +1172,7 @@ export const Layout = (props: {
                     });
 
                     console.log('Queued failed offline POST:', path);
-                    showNotification("Changes saved locally and will sync when online", 'info');
+                    showNotification(tr('Aenderungen lokal gespeichert und werden online synchronisiert', 'Changes saved locally and will sync when online'), 'info');
                 }
             });
 
@@ -1342,7 +1348,7 @@ export const Layout = (props: {
                             if (!emptyMessage) {
                                 const listView = itemsList.closest('.list-view');
                                 if (listView) {
-                                    listView.insertAdjacentHTML('afterbegin', '<div id="empty-message" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1rem; color: var(--text-secondary); text-align: center;">You have no more items to shop - well done!</div>');
+                                    listView.insertAdjacentHTML('afterbegin', '<div id="empty-message" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1rem; color: var(--text-secondary); text-align: center;">' + tr('Du hast keine Eintraege mehr auf der Liste - gut gemacht!', 'You have no more items to shop - well done!') + '</div>');
                                 }
                             }
                         } else if (emptyMessage) {
@@ -1667,7 +1673,7 @@ export const Layout = (props: {
             
             // Handle duplicate item error
             if (xhr.status === 409) {
-                let message = 'Item already exists in this list';
+                let message = tr('Eintrag existiert bereits in dieser Liste', 'Item already exists in this list');
                 try {
                     const response = JSON.parse(xhr.responseText);
                     if (response.error) {

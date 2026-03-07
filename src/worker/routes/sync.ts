@@ -1,16 +1,18 @@
 import { Hono } from 'hono';
 import type { HonoContext, SyncRequest, SyncResponse, ShoppingItem } from '../types';
 import * as db from '../db';
+import { resolveLocale, t } from '../i18n';
 
 export const syncRoutes = new Hono<HonoContext>();
 
 syncRoutes.post('/sync', async (c) => {
+    const locale = resolveLocale(c.req.header('Accept-Language'));
     try {
         const deviceId = c.get('deviceId') as string;
         const { listId, operations } = await c.req.json<SyncRequest>();
 
         if (!listId) {
-            return c.json({ error: 'listId is required' }, 400);
+            return c.json({ error: t(locale, 'listId is required', 'listId ist erforderlich') }, 400);
         }
 
         // Get current server state
@@ -92,6 +94,6 @@ syncRoutes.post('/sync', async (c) => {
         return c.json(response);
     } catch (err) {
         console.error('Error during sync:', err);
-        return c.json({ error: 'Sync failed' }, 500);
+        return c.json({ error: t(locale, 'Sync failed', 'Synchronisierung fehlgeschlagen') }, 500);
     }
 });

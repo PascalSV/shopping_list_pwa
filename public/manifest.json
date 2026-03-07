@@ -1,7 +1,7 @@
 {
-    "name": "ShopList - Shopping List PWA",
-    "short_name": "ShopList",
-    "description": "Offline-first shopping list with multi-device sync",
+    "name": "Pascals Shopping List",
+    "short_name": "Pascals List",
+    "description": "Pascals Shopping List with offline-first multi-device sync",
     "start_url": "/",
     "display": "standalone",
     "orientation": "portrait-primary",
@@ -35,7 +35,7 @@
         {
             "name": "Create List",
             "short_name": "New List",
-            "description": "Create a new shopping list",
+            "description": "Create a new list in Pascals Shopping List",
             "url": "/list/create",
             "icons": [
                 {

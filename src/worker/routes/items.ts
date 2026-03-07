@@ -1,23 +1,25 @@
 import { Hono } from 'hono';
-import { html } from 'hono/html';
 import type { HonoContext } from '../types';
 import * as db from '../db';
+import { resolveLocale, t } from '../i18n';
 import { ListItemRow } from '../views/components';
 
 export const itemsRoutes = new Hono<HonoContext>();
 
 itemsRoutes.get('/lists/:listId/items', async (c) => {
+    const locale = resolveLocale(c.req.header('Accept-Language'));
     try {
         const { listId } = c.req.param();
         const items = await db.getListItems(c.env.DB, listId);
         return c.json(items);
     } catch (err) {
         console.error('Error fetching items:', err);
-        return c.json({ error: 'Failed to fetch items' }, 500);
+        return c.json({ error: t(locale, 'Failed to fetch items', 'Eintraege konnten nicht geladen werden') }, 500);
     }
 });
 
 itemsRoutes.post('/lists/:listId/items', async (c) => {
+    const locale = resolveLocale(c.req.header('Accept-Language'));
     try {
         const { listId } = c.req.param();
         const deviceId = c.get('deviceId') as string;
@@ -25,7 +27,7 @@ itemsRoutes.post('/lists/:listId/items', async (c) => {
         // Validate that the list exists
         const list = await db.getList(c.env.DB, listId);
         if (!list) {
-            return c.json({ error: 'List not found' }, 404);
+            return c.json({ error: t(locale, 'List not found', 'Liste nicht gefunden') }, 404);
         }
 
         let name: string;
@@ -47,7 +49,7 @@ itemsRoutes.post('/lists/:listId/items', async (c) => {
         }
 
         if (!name) {
-            return c.json({ error: 'Name is required' }, 400);
+            return c.json({ error: t(locale, 'Name is required', 'Name ist erforderlich') }, 400);
         }
 
         // Check if item with same name already exists in this list
@@ -56,7 +58,7 @@ itemsRoutes.post('/lists/:listId/items', async (c) => {
         const duplicate = existingItems.find(item => item.name.toLowerCase().trim() === nameLower);
 
         if (duplicate) {
-            return c.json({ error: 'Item already exists in this list' }, 409);
+            return c.json({ error: t(locale, 'Item already exists in this list', 'Eintrag existiert bereits in dieser Liste') }, 409);
         }
 
         const item = await db.createItem(
@@ -76,11 +78,12 @@ itemsRoutes.post('/lists/:listId/items', async (c) => {
         return c.json(item, 201);
     } catch (err) {
         console.error('Error creating item:', err);
-        return c.json({ error: 'Failed to create item' }, 500);
+        return c.json({ error: t(locale, 'Failed to create item', 'Eintrag konnte nicht erstellt werden') }, 500);
     }
 });
 
 itemsRoutes.patch('/lists/:listId/items/:itemId/toggle', async (c) => {
+    const locale = resolveLocale(c.req.header('Accept-Language'));
     try {
         const { itemId } = c.req.param();
         const deviceId = c.get('deviceId') as string;
@@ -88,7 +91,7 @@ itemsRoutes.patch('/lists/:listId/items/:itemId/toggle', async (c) => {
         const item = await db.toggleItem(c.env.DB, itemId, deviceId);
 
         if (!item) {
-            return c.json({ error: 'Item not found' }, 404);
+            return c.json({ error: t(locale, 'Item not found', 'Eintrag nicht gefunden') }, 404);
         }
 
         const { listId } = c.req.param();
@@ -96,11 +99,12 @@ itemsRoutes.patch('/lists/:listId/items/:itemId/toggle', async (c) => {
         return c.html(ListItemRow(item, listId));
     } catch (err) {
         console.error('Error toggling item:', err);
-        return c.json({ error: 'Failed to toggle item' }, 500);
+        return c.json({ error: t(locale, 'Failed to toggle item', 'Eintrag konnte nicht aktualisiert werden') }, 500);
     }
 });
 
 itemsRoutes.patch('/lists/:listId/items/:itemId', async (c) => {
+    const locale = resolveLocale(c.req.header('Accept-Language'));
     try {
         const { itemId } = c.req.param();
         const deviceId = c.get('deviceId') as string;
@@ -133,7 +137,7 @@ itemsRoutes.patch('/lists/:listId/items/:itemId', async (c) => {
         );
 
         if (!item) {
-            return c.json({ error: 'Item not found' }, 404);
+            return c.json({ error: t(locale, 'Item not found', 'Eintrag nicht gefunden') }, 404);
         }
 
         // If HTMX request, return HTML fragment
@@ -145,11 +149,12 @@ itemsRoutes.patch('/lists/:listId/items/:itemId', async (c) => {
         return c.json(item);
     } catch (err) {
         console.error('Error updating item:', err);
-        return c.json({ error: 'Failed to update item' }, 500);
+        return c.json({ error: t(locale, 'Failed to update item', 'Eintrag konnte nicht aktualisiert werden') }, 500);
     }
 });
 
 itemsRoutes.delete('/lists/:listId/items/:itemId', async (c) => {
+    const locale = resolveLocale(c.req.header('Accept-Language'));
     try {
         const { itemId, listId } = c.req.param();
         await db.deleteItem(c.env.DB, itemId);
@@ -162,7 +167,7 @@ itemsRoutes.delete('/lists/:listId/items/:itemId', async (c) => {
         return c.json({ success: true });
     } catch (err) {
         console.error('Error deleting item:', err);
-        return c.json({ error: 'Failed to delete item' }, 500);
+        return c.json({ error: t(locale, 'Failed to delete item', 'Eintrag konnte nicht geloescht werden') }, 500);
     }
 });
 
