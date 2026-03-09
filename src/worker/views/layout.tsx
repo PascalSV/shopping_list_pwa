@@ -8,6 +8,12 @@ export const Layout = (props: {
     title: string;
     locale: Locale;
     lists: ShoppingList[];
+    tabSlots?: Array<{
+        index: number;
+        listId?: string;
+        name?: string;
+        active: boolean;
+    }>;
     currentListId?: string;
     children: HtmlEscapedString;
 }) => html`<!DOCTYPE html>
@@ -284,6 +290,125 @@ export const Layout = (props: {
             background: var(--secondary);
             border-top: 1px solid var(--border);
             box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .tab-bar {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.4rem;
+            margin-top: 0.55rem;
+        }
+
+        .tab-btn {
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            border-radius: var(--radius-lg);
+            min-height: 58px;
+            padding: 0.35rem 0.2rem 0.3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.18rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .tab-btn:active {
+            opacity: 0.86;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .tab-btn.empty {
+            color: var(--text-tertiary);
+        }
+
+        .tab-btn.config {
+            color: var(--text-primary);
+        }
+
+        .tab-icon {
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tab-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .tab-title {
+            display: block;
+            width: 100%;
+            font-size: 0.72rem;
+            line-height: 1.1;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-height: 0.78rem;
+            padding: 0 0.15rem;
+        }
+
+        .tab-btn.empty .tab-title {
+            color: transparent;
+        }
+
+        .tab-name-dialog-overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.46);
+            z-index: 260;
+        }
+
+        .tab-name-dialog-overlay.visible {
+            display: flex;
+        }
+
+        .tab-name-dialog {
+            width: min(92vw, 420px);
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            padding: 1.35rem;
+        }
+
+        .tab-name-dialog h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+        }
+
+        .tab-name-dialog p {
+            margin: 0.55rem 0 0.9rem 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .tab-name-dialog .form-group {
+            margin-bottom: 0;
+        }
+
+        .tab-name-dialog .form-actions {
+            margin-top: 1rem;
         }
 
         /* Items List */
@@ -985,14 +1110,6 @@ export const Layout = (props: {
         ${props.currentListId ? html`
         <div class="header">
             <div id="list-toolbar" class="list-toolbar">
-                <button 
-                    class="btn btn-secondary list-back-btn"
-                    hx-get="/lists"
-                    hx-target="body"
-                    hx-swap="innerHTML"
-                >
-                    ${t(props.locale, 'My Lists', 'Meine Listen')}
-                </button>
                 <h2 id="toolbar-title" class="list-title" style="display: none;" data-list-id="${props.currentListId}">${props.title}</h2>
             </div>
         </div>
@@ -1007,6 +1124,52 @@ export const Layout = (props: {
                 <div id="inline-error-banner" class="inline-error-banner" role="status" aria-live="polite"></div>
                 ${SearchForm({ listId: props.currentListId, locale: props.locale })}
             ` : ''}
+            ${props.tabSlots ? html`
+                <div id="tab-bar" class="tab-bar">
+                    ${props.tabSlots.map((slot) => html`
+                        <button
+                            type="button"
+                            class="tab-btn ${slot.active ? 'active' : ''} ${slot.listId ? '' : 'empty'}"
+                            data-tab-index="${slot.index}"
+                            data-list-id="${slot.listId || ''}"
+                            data-list-name="${slot.name || ''}"
+                        >
+                            <span class="tab-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 7h16"></path>
+                                    <path d="M4 12h16"></path>
+                                    <path d="M4 17h10"></path>
+                                </svg>
+                            </span>
+                            <span class="tab-title">${slot.name || ''}</span>
+                        </button>
+                    `)}
+                    <button type="button" class="tab-btn config" aria-label="${t(props.locale, 'Configuration', 'Konfiguration')}">
+                        <span class="tab-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 15 19.4a1.65 1.65 0 0 0-1 .6 1.65 1.65 0 0 0-.33 1.82 2 2 0 1 1-3.34 0A1.65 1.65 0 0 0 10 20a1.65 1.65 0 0 0-1-.6 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-.6-1 1.65 1.65 0 0 0-1.82-.33 2 2 0 1 1 0-3.34A1.65 1.65 0 0 0 4 10c.24-.38.44-.79.6-1.23A1.65 1.65 0 0 0 4.27 7l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6c.4-.16.82-.36 1.23-.6A1.65 1.65 0 0 0 11 2.18a2 2 0 1 1 2 0A1.65 1.65 0 0 0 13.77 4c.41.24.83.44 1.23.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.16.4.36.82.6 1.23a1.65 1.65 0 0 0 1.82.33 2 2 0 1 1 0 3.34A1.65 1.65 0 0 0 20 14c-.24.38-.44.79-.6 1.23z"></path>
+                            </svg>
+                        </span>
+                        <span class="tab-title">${t(props.locale, 'Config', 'Config')}</span>
+                    </button>
+                </div>
+            ` : ''}
+        </div>
+    </div>
+
+    <div id="tab-name-dialog" class="tab-name-dialog-overlay" aria-hidden="true">
+        <div class="tab-name-dialog" role="dialog" aria-modal="true" aria-labelledby="tab-name-dialog-title">
+            <h2 id="tab-name-dialog-title">${t(props.locale, 'Edit list name', 'Listenname bearbeiten')}</h2>
+            <p id="tab-name-dialog-description">${t(props.locale, 'Choose a clear name for this tab.', 'Waehle einen klaren Namen fuer diesen Tab.')}</p>
+            <div class="form-group">
+                <label for="tab-name-input">${t(props.locale, 'List name', 'Listenname')}</label>
+                <input id="tab-name-input" type="text" maxlength="80" autocomplete="off" />
+            </div>
+            <div class="form-actions">
+                <button id="tab-name-dialog-confirm" type="button" class="btn btn-primary">${t(props.locale, 'Save', 'Speichern')}</button>
+                <button id="tab-name-dialog-cancel" type="button" class="btn btn-secondary">${t(props.locale, 'Cancel', 'Abbrechen')}</button>
+            </div>
         </div>
     </div>
 
@@ -1627,6 +1790,231 @@ export const Layout = (props: {
             listRows.forEach(row => initializeListRowInteractions(row));
         };
 
+        const createTabNameDialogController = () => {
+            const overlay = document.getElementById('tab-name-dialog');
+            const title = document.getElementById('tab-name-dialog-title');
+            const description = document.getElementById('tab-name-dialog-description');
+            const input = document.getElementById('tab-name-input');
+            const confirmButton = document.getElementById('tab-name-dialog-confirm');
+            const cancelButton = document.getElementById('tab-name-dialog-cancel');
+
+            if (!overlay || !title || !description || !input || !confirmButton || !cancelButton) {
+                return {
+                    requestName: async (mode, currentName) => {
+                        const fallbackLabel = mode === 'edit'
+                            ? tr('Listenname bearbeiten', 'Edit list name')
+                            : tr('Listennamen vergeben', 'Name this list');
+                        return window.prompt(fallbackLabel, currentName || '');
+                    }
+                };
+            }
+
+            let resolver = null;
+
+            const closeDialog = (result) => {
+                overlay.classList.remove('visible');
+                overlay.setAttribute('aria-hidden', 'true');
+
+                if (resolver) {
+                    const resolve = resolver;
+                    resolver = null;
+                    resolve(result);
+                }
+            };
+
+            const submitDialog = () => {
+                const trimmedName = input.value.trim();
+                if (!trimmedName) {
+                    if (window.showNotification) {
+                        window.showNotification(tr('Bitte einen Namen eingeben', 'Please enter a name'), 'error');
+                    }
+                    input.focus();
+                    return;
+                }
+
+                closeDialog(trimmedName);
+            };
+
+            confirmButton.addEventListener('click', submitDialog);
+            cancelButton.addEventListener('click', () => closeDialog(null));
+            overlay.addEventListener('click', (event) => {
+                if (event.target === overlay) {
+                    closeDialog(null);
+                }
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (!overlay.classList.contains('visible')) {
+                    return;
+                }
+
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    closeDialog(null);
+                    return;
+                }
+
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    submitDialog();
+                }
+            });
+
+            return {
+                requestName: (mode, currentName) => {
+                    if (resolver) {
+                        closeDialog(null);
+                    }
+
+                    const isEdit = mode === 'edit';
+                    title.textContent = isEdit
+                        ? tr('Listenname bearbeiten', 'Edit list name')
+                        : tr('Listennamen vergeben', 'Name this list');
+                    description.textContent = isEdit
+                        ? tr('Der neue Name wird sofort im Tab angezeigt.', 'The new name will be shown in the tab immediately.')
+                        : tr('Vergib einen Namen, damit der Tab genutzt werden kann.', 'Set a name so this tab can be used.');
+                    confirmButton.textContent = isEdit
+                        ? tr('Speichern', 'Save')
+                        : tr('Liste erstellen', 'Create list');
+
+                    input.value = currentName || '';
+                    overlay.classList.add('visible');
+                    overlay.setAttribute('aria-hidden', 'false');
+
+                    window.setTimeout(() => {
+                        input.focus();
+                        input.select();
+                    }, 0);
+
+                    return new Promise((resolve) => {
+                        resolver = resolve;
+                    });
+                }
+            };
+        };
+
+        const tabNameDialogController = createTabNameDialogController();
+
+        const initializeTabBarInteractions = () => {
+            const tabButtons = document.querySelectorAll('.tab-btn[data-tab-index]');
+
+            const saveTabName = async (button) => {
+                const existingListId = button.dataset.listId || '';
+                const existingName = button.dataset.listName || '';
+
+                const mode = existingListId ? 'edit' : 'create';
+                const enteredName = await tabNameDialogController.requestName(mode, existingName);
+                if (enteredName === null) {
+                    return;
+                }
+
+                const trimmedName = enteredName.trim();
+                if (!trimmedName) {
+                    if (window.showNotification) {
+                        window.showNotification(tr('Bitte einen Namen eingeben', 'Please enter a name'), 'error');
+                    }
+                    return;
+                }
+
+                try {
+                    if (existingListId) {
+                        const response = await fetch('/api/lists/' + existingListId, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name: trimmedName })
+                        });
+
+                        if (!response.ok) {
+                            const body = await response.json().catch(() => ({}));
+                            throw new Error(body && body.error ? body.error : 'Failed to rename tab list');
+                        }
+
+                        window.location.reload();
+                        return;
+                    }
+
+                    const createResponse = await fetch('/api/lists', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: trimmedName })
+                    });
+
+                    if (!createResponse.ok) {
+                        const body = await createResponse.json().catch(() => ({}));
+                        throw new Error(body && body.error ? body.error : 'Failed to create tab list');
+                    }
+
+                    const created = await createResponse.json();
+                    if (created && created.id) {
+                        window.location.href = '/list/' + created.id;
+                    } else {
+                        window.location.reload();
+                    }
+                } catch (err) {
+                    console.error('Tab save failed:', err);
+                    if (window.showNotification) {
+                        const fallback = tr('Speichern fehlgeschlagen', 'Failed to save tab name');
+                        window.showNotification(err && err.message ? err.message : fallback, 'error');
+                    }
+                }
+            };
+
+            tabButtons.forEach((button) => {
+                if (button.dataset.tabBound === 'true') {
+                    return;
+                }
+
+                button.dataset.tabBound = 'true';
+
+                let pressTimer;
+                let longPressTriggered = false;
+
+                const clearPressTimer = () => {
+                    if (pressTimer) {
+                        clearTimeout(pressTimer);
+                        pressTimer = null;
+                    }
+                };
+
+                const startPress = () => {
+                    longPressTriggered = false;
+                    clearPressTimer();
+                    pressTimer = setTimeout(async () => {
+                        longPressTriggered = true;
+                        await saveTabName(button);
+                    }, 600);
+                };
+
+                const endPress = async () => {
+                    clearPressTimer();
+                    if (longPressTriggered) {
+                        return;
+                    }
+
+                    const listId = button.dataset.listId || '';
+                    if (!listId) {
+                        if (window.showNotification) {
+                            window.showNotification(
+                                tr('Lange druecken, um einen Namen zu vergeben', 'Long press to name this tab'),
+                                'info'
+                            );
+                        }
+                        return;
+                    }
+
+                    window.location.href = '/list/' + listId;
+                };
+
+                button.addEventListener('mousedown', startPress);
+                button.addEventListener('touchstart', startPress, { passive: true });
+                button.addEventListener('mouseup', endPress);
+                button.addEventListener('touchend', endPress);
+                button.addEventListener('mouseleave', clearPressTimer);
+                button.addEventListener('touchcancel', clearPressTimer);
+                button.addEventListener('contextmenu', (event) => event.preventDefault());
+            });
+        };
+
         // Search and autocomplete functionality
         {
             const searchInput = document.getElementById('search-input');
@@ -1689,12 +2077,14 @@ export const Layout = (props: {
             initializeAllItems();
             initializeAllListRows();
             initializeListToolbar();
+            initializeTabBarInteractions();
         });
 
         htmx.on('htmx:afterSwap', () => {
             initializeAllItems();
             initializeAllListRows();
             initializeListToolbar();
+            initializeTabBarInteractions();
         });
 
         htmx.on('htmx:afterRequest', (event) => {

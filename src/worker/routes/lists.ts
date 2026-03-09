@@ -21,6 +21,11 @@ listsRoutes.post('/lists', async (c) => {
     try {
         const deviceId = c.get('deviceId') as string;
 
+        const existingLists = await db.getAllLists(c.env.DB);
+        if (existingLists.length >= 3) {
+            return c.json({ error: t(locale, 'Maximum of three lists reached', 'Maximal drei Listen moeglich') }, 400);
+        }
+
         let name: string;
 
         // Handle both JSON and form data

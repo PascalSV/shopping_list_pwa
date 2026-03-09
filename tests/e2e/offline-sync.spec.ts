@@ -3,6 +3,20 @@ import { test, expect } from '@playwright/test';
 // Allow service workers for offline caching to work
 test.use({ serviceWorkers: 'allow' });
 
+async function createListViaApi(page: any, listName: string): Promise<string> {
+    const response = await page.request.post('/api/lists', {
+        data: { name: listName }
+    });
+    expect(response.ok()).toBeTruthy();
+
+    const body = await response.json() as { id?: string };
+    if (!body.id) {
+        throw new Error('Expected list id after API list creation');
+    }
+
+    return body.id;
+}
+
 test('device works offline and syncs when back online', async ({ browser, request }) => {
     test.setTimeout(120000);
 
@@ -34,16 +48,9 @@ test('device works offline and syncs when back online', async ({ browser, reques
     await pageB.goto('/');
 
     // Device A creates a list
-    await pageA.locator('button[hx-get="/list/create"]').click();
-    await pageA.locator('#listName').waitFor({ state: 'visible' });
-    await pageA.locator('#listName').fill('Shopping List');
-    await pageA.locator('form button[type="submit"]').first().click();
+    const listId = await createListViaApi(pageA, 'Shopping List');
+    await pageA.goto('/list/' + listId);
     await expect(pageA.locator('#scrolling-title')).toHaveText('Shopping List');
-
-    const listId = await pageA.locator('#scrolling-title').getAttribute('data-list-id');
-    if (!listId) {
-        throw new Error('Expected list id to be present');
-    }
 
     // Device A adds several items
     const initialItems = ['Milk', 'Bread', 'Eggs', 'Cheese', 'Butter', 'Apples'];
@@ -237,16 +244,9 @@ test('device can browse and view while offline, then add items when back online'
     console.log('=== Setup: Device A creates list with items ===');
 
     await pageA.goto('/');
-    await pageA.locator('button[hx-get="/list/create"]').click();
-    await pageA.locator('#listName').waitFor({ state: 'visible' });
-    await pageA.locator('#listName').fill('Office Supplies');
-    await pageA.locator('form button[type="submit"]').first().click();
+    const listId = await createListViaApi(pageA, 'Office Supplies');
+    await pageA.goto('/list/' + listId);
     await expect(pageA.locator('#scrolling-title')).toHaveText('Office Supplies');
-
-    const listId = await pageA.locator('#scrolling-title').getAttribute('data-list-id');
-    if (!listId) {
-        throw new Error('Expected list id to be present');
-    }
 
     // Add items
     const items = ['Pens', 'Paper', 'Stapler', 'Notebooks'];
@@ -276,11 +276,9 @@ test('device can browse and view while offline, then add items when back online'
         await expect(pageB.locator('.item').filter({ hasText: item })).toBeVisible();
     }
 
-    // Try to navigate back to lists while offline
-    await pageB.locator('button[hx-get="/lists"]').click();
-
-    // With service worker blocked, this will fail to load, but the button click should work
-    await pageB.waitForTimeout(2000);
+    // Interact while offline and ensure no unexpected modal/navigation breakage
+    await pageB.locator('.tab-btn.empty').first().click();
+    await pageB.waitForTimeout(1000);
 
     console.log('=== Device B comes back online ===');
 

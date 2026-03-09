@@ -1,5 +1,5 @@
 import { html } from 'hono/html';
-import type { ShoppingItem, ShoppingList } from '../types';
+import type { ShoppingItem } from '../types';
 import type { Locale } from '../i18n';
 import { t } from '../i18n';
 
@@ -111,212 +111,23 @@ export const ListView = (props: {
     </div>
 `;
 
-export const ListsManagementView = (props: {
-    lists: ShoppingList[];
+export const EmptyTabView = (props: {
     locale: Locale;
-}) => {
-    return html`
-        <div class="lists-management">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${t(props.locale, 'Your Lists', 'Deine Listen')}</h2>
-                <div style="display: flex; gap: 0.55rem; align-items: center;">
-                    <a href="/logout" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center;">
-                        ${t(props.locale, 'Logout', 'Abmelden')}
-                    </a>
-                </div>
+}) => html`
+    <div class="list-view" style="display: flex; align-items: center; justify-content: center; min-height: 60vh;">
+        <div class="empty-state" style="max-width: 420px; text-align: center;">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 72px; height: 72px; margin: 0 auto 1rem; opacity: 0.3;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <div style="font-size: 1.05rem; color: var(--text-secondary); margin-bottom: 0.55rem;">
+                ${t(props.locale, 'Long press one of the first three tabs to name your list.', 'Halte einen der ersten drei Tabs gedrueckt, um deine Liste zu benennen.')}
             </div>
-
-            ${props.lists.length === 0 ? html`
-                <div class="empty-state">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 80px; height: 80px; margin: 0 auto 1rem; opacity: 0.3;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    <div style="margin-bottom: 2rem;">${t(props.locale, 'No lists yet. Create your first shopping list!', 'Noch keine Listen. Erstelle deine erste Einkaufsliste!')}</div>
-                </div>
-            ` : html`
-                <div class="lists-grid" id="lists-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
-                    ${props.lists.map(list => html`
-                        <div class="list-card" data-list-id="${list.id}" style="background: var(--bg-primary); padding: 1.5rem; border-radius: var(--radius-xl); box-shadow: var(--shadow-md); border: 1px solid var(--border); cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; position: relative;">
-                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                                <h3 class="list-name" style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0; flex: 1; word-break: break-word; cursor: pointer;">${list.name}</h3>
-                                <div style="display: flex; gap: 0.5rem; opacity: 0.7;">
-                                    <button class="icon-btn-edit" style="background: transparent; border: none; cursor: pointer; padding: 0.5rem; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 1rem; transition: all 0.2s;" title="${t(props.locale, 'Edit list name', 'Listennamen bearbeiten')}">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                        </svg>
-                                    </button>
-                                    <button class="icon-btn-delete" style="background: transparent; border: none; cursor: pointer; padding: 0.5rem; display: flex; align-items: center; justify-content: center; color: var(--danger); font-size: 1rem; transition: all 0.2s;" title="${t(props.locale, 'Delete list', 'Liste loeschen')}">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="3 6 5 6 21 6"></polyline>
-                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <div style="flex: 1;"></div>
-                            <div style="padding-top: 0.75rem; color: var(--text-secondary); font-size: 0.875rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; text-decoration: none;" onclick="window.location.href = '/list/${list.id}'">
-                                ${t(props.locale, 'Open list', 'Liste oeffnen')}
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="9 18 15 12 9 6"></polyline>
-                                </svg>
-                            </div>
-                        </div>
-                    `)}
-                </div>
-            `}
-
-            <div style="display: flex; justify-content: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
-                <button 
-                    class="btn btn-primary"
-                    hx-get="/list/create"
-                    hx-target="body"
-                    hx-swap="beforeend"
-                    style="display: inline-flex; align-items: center; gap: 0.75rem;"
-                >
-                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                    ${t(props.locale, 'Create New List', 'Neue Liste erstellen')}
-                </button>
+            <div style="font-size: 0.9rem; color: var(--text-tertiary);">
+                ${t(props.locale, 'A tab can only be opened after a name is set.', 'Ein Tab kann erst geoeffnet werden, wenn ein Name vergeben wurde.')}
             </div>
         </div>
-
-        <!-- Delete Confirmation Modal (styled like Create List dialog) -->
-        <div id="deleteModal" class="form-container" style="display: none;">
-            <form id="deleteModalForm">
-                <h2>${t(props.locale, 'Delete List', 'Liste loeschen')}</h2>
-                <p id="deleteMessage" style="color: var(--text-secondary); margin: 0 0 1.5rem 0; line-height: 1.5;"></p>
-                <div class="form-actions">
-                    <button id="confirmDeleteBtn" type="button" class="btn btn-danger">
-                        ${t(props.locale, 'Delete', 'Loeschen')}
-                    </button>
-                    <button id="cancelDeleteBtn" type="button" class="btn btn-secondary">
-                        ${t(props.locale, 'Cancel', 'Abbrechen')}
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <script>
-            const isGerman = (document.documentElement.lang || '').toLowerCase().startsWith('de');
-            const tr = (de, en) => (isGerman ? de : en);
-
-            let pendingDeleteListId = null;
-            const deleteModal = document.getElementById('deleteModal');
-            const deleteMessage = document.getElementById('deleteMessage');
-            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-
-            cancelDeleteBtn.addEventListener('click', () => {
-                deleteModal.style.display = 'none';
-                pendingDeleteListId = null;
-            });
-
-            deleteModal.addEventListener('click', (e) => {
-                if (e.target === deleteModal) {
-                    deleteModal.style.display = 'none';
-                    pendingDeleteListId = null;
-                }
-            });
-
-            confirmDeleteBtn.addEventListener('click', () => {
-                if (pendingDeleteListId) {
-                    fetch('/api/lists/' + pendingDeleteListId, { method: 'DELETE' })
-                    .then(r => {
-                        if (r.ok) {
-                            const card = document.querySelector('[data-list-id="' + pendingDeleteListId + '"]');
-                            card.remove();
-                            deleteModal.style.display = 'none';
-                            pendingDeleteListId = null;
-                        } else {
-                            alert(tr('Liste konnte nicht geloescht werden', 'Failed to delete list'));
-                            deleteModal.style.display = 'none';
-                            pendingDeleteListId = null;
-                        }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        alert(tr('Fehler beim Loeschen der Liste', 'Error deleting list'));
-                        deleteModal.style.display = 'none';
-                        pendingDeleteListId = null;
-                    });
-                }
-            });
-
-            document.addEventListener('click', function(e) {
-                const editBtn = e.target.closest('.icon-btn-edit');
-                const deleteBtn = e.target.closest('.icon-btn-delete');
-                
-                if (editBtn) {
-                    e.stopPropagation();
-                    const card = editBtn.closest('.list-card');
-                    const nameEl = card.querySelector('.list-name');
-                    const listId = card.dataset.listId;
-                    const currentName = nameEl.textContent;
-                    
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.value = currentName;
-                    input.style.cssText = 'font-size: 1.25rem; font-weight: 700; color: var(--text-primary); border: 2px solid var(--primary); border-radius: 0.375rem; padding: 0.5rem; width: 100%;';
-                    
-                    nameEl.replaceWith(input);
-                    input.focus();
-                    input.select();
-                    
-                    function saveNewName() {
-                        const newName = input.value.trim();
-                        if (newName && newName !== currentName) {
-                            fetch('/api/lists/' + listId, {
-                                method: 'PUT',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ name: newName })
-                            })
-                            .then(r => {
-                                if (r.ok) {
-                                    nameEl.textContent = newName;
-                                    input.replaceWith(nameEl);
-                                } else {
-                                    alert(tr('Listenname konnte nicht aktualisiert werden', 'Failed to update list name'));
-                                    input.replaceWith(nameEl);
-                                }
-                            })
-                            .catch(err => {
-                                console.error(err);
-                                alert(tr('Fehler beim Aktualisieren des Listennamens', 'Error updating list name'));
-                                input.replaceWith(nameEl);
-                            });
-                        } else {
-                            input.replaceWith(nameEl);
-                        }
-                    }
-                    
-                    input.addEventListener('blur', saveNewName);
-                    input.addEventListener('keydown', (ev) => {
-                        if (ev.key === 'Enter') saveNewName();
-                        if (ev.key === 'Escape') input.replaceWith(nameEl);
-                    });
-                }
-                
-                if (deleteBtn) {
-                    e.stopPropagation();
-                    const card = deleteBtn.closest('.list-card');
-                    const listId = card.dataset.listId;
-                    const listName = card.querySelector('.list-name').textContent;
-                    
-                    pendingDeleteListId = listId;
-                    deleteMessage.textContent = tr(
-                        'Moechtest du die Liste "' + listName + '" wirklich loeschen? Diese Aktion kann nicht rueckgaengig gemacht werden.',
-                        'Are you sure you want to delete "' + listName + '"? This action cannot be undone.'
-                    );
-                    deleteModal.style.display = 'flex';
-                }
-            });
-        </script>
-    `;
-};
+    </div>
+`;
 
 export const CreateListForm = (props: { locale: Locale }) => html`
     <div class="form-container">
@@ -341,7 +152,7 @@ export const CreateListForm = (props: { locale: Locale }) => html`
                 <button type="submit" class="btn btn-primary" style="flex: 1.5;">
                     ${t(props.locale, 'Create List', 'Liste erstellen')}
                 </button>
-                <button type="button" class="btn btn-secondary" hx-get="/lists" hx-target="body" hx-swap="innerHTML">
+                <button type="button" class="btn btn-secondary" hx-get="/" hx-target="body" hx-swap="innerHTML">
                     ${t(props.locale, 'Cancel', 'Abbrechen')}
                 </button>
             </div>
@@ -382,7 +193,7 @@ export const EditListForm = (props: {
                     hx-delete="/api/lists/${props.listId}"
                     hx-swap="none"
                     hx-confirm="${t(props.locale, 'Permanently delete this list? This cannot be undone.', 'Diese Liste endgueltig loeschen? Das kann nicht rueckgaengig gemacht werden.')}"
-                    hx-on::after-settle="window.location.href = '/lists'"
+                    hx-on::after-settle="window.location.href = '/'"
                 >
                     ${t(props.locale, 'Delete', 'Loeschen')}
                 </button>
@@ -390,7 +201,7 @@ export const EditListForm = (props: {
             <button 
                 type="button" 
                 class="btn btn-secondary"
-                hx-get="/lists" 
+                hx-get="/list/${props.listId}" 
                 hx-target="body" 
                 hx-swap="innerHTML"
                 style="width: 100%; margin-top: 0.5rem;"

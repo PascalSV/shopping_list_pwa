@@ -25,6 +25,20 @@ async function createAuthedContext(browser: any) {
     return context;
 }
 
+async function createListViaApi(page: any, listName: string): Promise<string> {
+    const response = await page.request.post('/api/lists', {
+        data: { name: listName }
+    });
+    expect(response.ok()).toBeTruthy();
+
+    const body = await response.json() as { id?: string };
+    if (!body.id) {
+        throw new Error('Expected list id after API list creation');
+    }
+
+    return body.id;
+}
+
 test('item remark added and changed is reflected on second device', async ({ browser, request }) => {
     test.setTimeout(60000);
     await cleanupLists(request);
@@ -37,15 +51,9 @@ test('item remark added and changed is reflected on second device', async ({ bro
 
     await pageA.goto('/');
 
-    await pageA.locator('button[hx-get="/list/create"]').click();
-    await pageA.locator('#listName').fill('Kitchen Supply');
-    await pageA.locator('form button[type="submit"]').first().click();
+    const listId = await createListViaApi(pageA, 'Kitchen Supply');
+    await pageA.goto('/list/' + listId);
     await expect(pageA.locator('#scrolling-title')).toHaveText('Kitchen Supply');
-
-    const listId = await pageA.locator('#scrolling-title').getAttribute('data-list-id');
-    if (!listId) {
-        throw new Error('Expected list id after creation');
-    }
 
     await pageA.locator('#search-input').fill('Olive Oil');
     await pageA.locator('#search-input').press('Enter');

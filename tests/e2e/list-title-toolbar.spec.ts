@@ -3,8 +3,8 @@ import { test, expect, type Page } from '@playwright/test';
 test.use({ serviceWorkers: 'block' });
 
 async function ensureLoggedIn(page: Page) {
-    const createListButton = page.locator('button[hx-get="/list/create"]');
-    if (await createListButton.isVisible().catch(() => false)) {
+    const tabBar = page.locator('#tab-bar');
+    if (await tabBar.isVisible().catch(() => false)) {
         return;
     }
 
@@ -15,7 +15,21 @@ async function ensureLoggedIn(page: Page) {
         await page.locator('button[type="submit"]').first().click();
     }
 
-    await expect(createListButton).toBeVisible();
+    await expect(tabBar).toBeVisible();
+}
+
+async function createListViaApi(page: Page, listName: string): Promise<string> {
+    const response = await page.request.post('/api/lists', {
+        data: { name: listName }
+    });
+    expect(response.ok()).toBeTruthy();
+
+    const body = await response.json() as { id?: string };
+    if (!body.id) {
+        throw new Error('Expected list id to be present after API list creation');
+    }
+
+    return body.id;
 }
 
 test('toolbar title appears early and scrolling title never overlays toolbar', async ({ browser }) => {
@@ -31,10 +45,8 @@ test('toolbar title appears early and scrolling title never overlays toolbar', a
 
     const listName = 'Toolbar Threshold Test ' + Date.now();
 
-    await page.locator('button[hx-get="/list/create"]').click();
-    await page.locator('#listName').waitFor({ state: 'visible' });
-    await page.locator('#listName').fill(listName);
-    await page.locator('form button[type="submit"]').first().click();
+    const listId = await createListViaApi(page, listName);
+    await page.goto('/list/' + listId);
 
     await expect(page.locator('#scrolling-title')).toHaveText(listName);
     await expect(page.locator('#toolbar-title')).toBeHidden();

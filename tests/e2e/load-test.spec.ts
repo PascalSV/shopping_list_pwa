@@ -51,12 +51,18 @@ async function createDevice(browser: Browser, name: string): Promise<Device> {
 
 async function createList(page: Page, listName: string): Promise<string> {
     await page.goto('/');
-    await expect(page.locator('.lists-management')).toBeVisible({ timeout: 15000 });
 
-    await page.locator('button[hx-get="/list/create"]').first().click();
-    await expect(page.locator('#listName')).toBeVisible({ timeout: 10000 });
-    await page.locator('#listName').fill(listName);
-    await page.locator('form button[type="submit"]').first().click();
+    const response = await page.request.post('/api/lists', {
+        data: { name: listName }
+    });
+    expect(response.ok()).toBeTruthy();
+
+    const created = await response.json() as { id?: string };
+    if (!created.id) {
+        throw new Error('Expected list id to be present after API list creation');
+    }
+
+    await page.goto('/list/' + created.id);
 
     await expect(page.locator('#scrolling-title')).toHaveText(listName, { timeout: 15000 });
 

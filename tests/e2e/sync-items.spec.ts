@@ -25,6 +25,20 @@ async function createAuthedContext(browser: any) {
     return context;
 }
 
+async function createListViaApi(page: any, listName: string): Promise<string> {
+    const response = await page.request.post('/api/lists', {
+        data: { name: listName }
+    });
+    expect(response.ok()).toBeTruthy();
+
+    const body = await response.json() as { id?: string };
+    if (!body.id) {
+        throw new Error('Expected list id after API list creation');
+    }
+
+    return body.id;
+}
+
 test('item add is reflected on second device UI', async ({ browser, request }) => {
     test.setTimeout(60000);
     await cleanupLists(request);
@@ -37,15 +51,9 @@ test('item add is reflected on second device UI', async ({ browser, request }) =
 
     await pageA.goto('/');
 
-    await pageA.locator('button[hx-get="/list/create"]').click();
-    await pageA.locator('#listName').fill('Shopping List');
-    await pageA.locator('form button[type="submit"]').first().click();
+    const listId = await createListViaApi(pageA, 'Shopping List');
+    await pageA.goto('/list/' + listId);
     await expect(pageA.locator('#scrolling-title')).toHaveText('Shopping List');
-
-    const listId = await pageA.locator('#scrolling-title').getAttribute('data-list-id');
-    if (!listId) {
-        throw new Error('Expected list id after creation');
-    }
 
     await pageA.locator('#search-input').fill('Milk');
     await pageA.locator('#search-input').press('Enter');
@@ -71,15 +79,9 @@ test('item delete is reflected on second device UI', async ({ browser, request }
 
     await pageA.goto('/');
 
-    await pageA.locator('button[hx-get="/list/create"]').click();
-    await pageA.locator('#listName').fill('Todo List');
-    await pageA.locator('form button[type="submit"]').first().click();
+    const listId = await createListViaApi(pageA, 'Todo List');
+    await pageA.goto('/list/' + listId);
     await expect(pageA.locator('#scrolling-title')).toHaveText('Todo List');
-
-    const listId = await pageA.locator('#scrolling-title').getAttribute('data-list-id');
-    if (!listId) {
-        throw new Error('Expected list id after creation');
-    }
 
     await pageA.locator('#search-input').fill('Task 1');
     await pageA.locator('#search-input').press('Enter');

@@ -9,7 +9,7 @@ import { adminRoutes } from './routes/admin';
 import * as db from './db';
 import { resolveLocale, t } from './i18n';
 import { Layout } from './views/layout';
-import { ListView, CreateListForm, EditListForm, EditItemForm, ListsManagementView, LoginForm } from './views/components';
+import { ListView, CreateListForm, EditListForm, EditItemForm, EmptyTabView, LoginForm } from './views/components';
 
 const app = new Hono<HonoContext>();
 
@@ -62,13 +62,82 @@ const isPublicPath = (path: string): boolean => {
     return false;
 };
 
+const buildTabSlots = (lists: Awaited<ReturnType<typeof db.getAllLists>>, activeListId?: string) => {
+    let sourceLists = [...lists];
+
+    if (activeListId) {
+        const activeList = sourceLists.find((list) => list.id === activeListId);
+        const activeIsInTopThree = sourceLists.slice(0, 3).some((list) => list.id === activeListId);
+
+        if (activeList && !activeIsInTopThree) {
+            sourceLists = [activeList, ...sourceLists.filter((list) => list.id !== activeListId)];
+        }
+    }
+
+    const visibleLists = sourceLists.slice(0, 3);
+
+    return [0, 1, 2].map((index) => {
+        const list = visibleLists[index];
+        return {
+            index: index + 1,
+            listId: list?.id,
+            name: list?.name,
+            active: Boolean(list && activeListId && list.id === activeListId)
+        };
+    });
+};
+
+const renderTabbedPage = async (c: any, preferredListId?: string) => {
+    const locale = resolveLocale(c.req.header('Accept-Language'));
+
+    const lists = await db.getAllLists(c.env.DB);
+
+    let selectedList = preferredListId ? lists.find((list) => list.id === preferredListId) : null;
+    if (!selectedList && lists.length > 0) {
+        selectedList = lists[0];
+    }
+
+    const currentListId = selectedList?.id;
+    const tabSlots = buildTabSlots(lists, currentListId);
+
+    if (!selectedList) {
+        return c.html(
+            Layout({
+                title: t(locale, 'Pascals Shopping List', 'Pascals Einkaufsliste'),
+                locale,
+                lists,
+                tabSlots,
+                children: EmptyTabView({ locale })
+            })
+        );
+    }
+
+    const items = await db.getListItems(c.env.DB, selectedList.id);
+
+    return c.html(
+        Layout({
+            title: selectedList.name,
+            locale,
+            lists,
+            tabSlots,
+            currentListId: selectedList.id,
+            children: ListView({
+                listId: selectedList.id,
+                listName: selectedList.name,
+                items,
+                locale
+            })
+        })
+    );
+};
+
 // Authentication middleware - protect app and API routes
 app.use('*', async (c, next) => {
     const path = c.req.path;
     const user = resolveUserFromRequest(c);
 
     if (path === '/login' && user) {
-        return c.redirect('/lists', 302);
+        return c.redirect('/', 302);
     }
 
     if (isPublicPath(path)) {
@@ -132,7 +201,7 @@ app.post('/login', async (c) => {
         maxAge: 60 * 60 * 24 * 30
     });
 
-    return c.redirect('/lists', 302);
+    return c.redirect('/', 302);
 });
 
 app.get('/logout', async (c) => {
@@ -142,29 +211,17 @@ app.get('/logout', async (c) => {
 
 // Page Routes
 app.get('/', async (c) => {
-    // Redirect home to lists management page
-    return c.redirect('/lists', 302);
+    try {
+        return await renderTabbedPage(c);
+    } catch (err) {
+        const locale = resolveLocale(c.req.header('Accept-Language'));
+        console.error('Error loading home:', err);
+        return c.text(t(locale, 'Error loading page', 'Fehler beim Laden der Seite'), 500);
+    }
 });
 
 app.get('/lists', async (c) => {
-    const locale = resolveLocale(c.req.header('Accept-Language'));
-    try {
-        const lists = await db.getAllLists(c.env.DB);
-        return c.html(
-            Layout({
-                title: t(locale, 'Pascals Shopping List - Your Lists', 'Pascals Einkaufsliste - Deine Listen'),
-                locale,
-                lists,
-                children: ListsManagementView({
-                    lists,
-                    locale
-                })
-            })
-        );
-    } catch (err) {
-        console.error('Error loading lists:', err);
-        return c.text(t(locale, 'Error loading page', 'Fehler beim Laden der Seite'), 500);
-    }
+    return c.redirect('/', 302);
 });
 
 app.get('/list/create', async (c) => {
@@ -207,22 +264,7 @@ app.get('/list/:listId', async (c) => {
             return c.redirect('/', 302);
         }
 
-        const items = await db.getListItems(c.env.DB, listId);
-
-        return c.html(
-            Layout({
-                title: `${list.name}`,
-                locale,
-                lists,
-                currentListId: listId,
-                children: ListView({
-                    listId,
-                    listName: list.name,
-                    items,
-                    locale
-                })
-            })
-        );
+        return await renderTabbedPage(c, listId);
     } catch (err) {
         console.error('Error loading list:', err);
         return c.text(t(locale, 'Error loading list', 'Fehler beim Laden der Liste'), 500);

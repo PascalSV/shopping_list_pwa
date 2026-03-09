@@ -29,9 +29,18 @@ async function createMobileAuthedContext(browser: any) {
 
 async function createListWithItems(page: any, listName: string, items: string[]) {
     await page.goto('/');
-    await page.locator('button[hx-get="/list/create"]').click();
-    await page.locator('#listName').fill(listName);
-    await page.locator('form button[type="submit"]').first().click();
+
+    const response = await page.request.post('/api/lists', {
+        data: { name: listName }
+    });
+    expect(response.ok()).toBeTruthy();
+
+    const created = await response.json() as { id?: string };
+    if (!created.id) {
+        throw new Error('Expected list id to be present after API list creation');
+    }
+
+    await page.goto('/list/' + created.id);
     await expect(page.locator('#scrolling-title')).toHaveText(listName);
 
     const searchInput = page.locator('#search-input');
