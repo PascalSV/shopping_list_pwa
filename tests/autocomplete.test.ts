@@ -129,17 +129,17 @@ describe('Autocomplete Functionality', () => {
         await worker.fetch('http://localhost/api/lists/' + testListId + '/items', {
             method: 'POST',
             headers: deviceHeaders,
-            body: JSON.stringify({ name: 'Chicken Breast' })
+            body: JSON.stringify({ name: 'Hähnchen Breast' })
         });
 
         // Search with lowercase
-        const response = await worker.fetch('http://localhost/api/autocomplete?q=chicken', {
+        const response = await worker.fetch('http://localhost/api/autocomplete?q=Hähnchen', {
             headers: deviceHeaders
         });
 
         expect(response.status).toBe(200);
         const html = await response.text();
-        expect(html).toContain('Chicken Breast');
+        expect(html).toContain('Hähnchen Breast');
     });
 
     it('should limit autocomplete results', async () => {

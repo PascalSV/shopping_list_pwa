@@ -287,9 +287,9 @@ export const Layout = (props: {
         }
 
         .container.has-search .footer {
-            background: var(--secondary);
-            border-top: 1px solid var(--border);
-            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+            background: transparent;
+            border-top: none;
+            box-shadow: none;
         }
 
         .tab-bar {
@@ -300,9 +300,9 @@ export const Layout = (props: {
         }
 
         .tab-btn {
-            border: 1px solid var(--border);
-            background: var(--bg-primary);
-            color: var(--text-secondary);
+            border: none;
+            background: transparent;
+            color: #ffffff;
             border-radius: var(--radius-lg);
             min-height: 58px;
             padding: 0.35rem 0.2rem 0.3rem;
@@ -312,7 +312,7 @@ export const Layout = (props: {
             justify-content: center;
             gap: 0.18rem;
             cursor: pointer;
-            box-shadow: var(--shadow-sm);
+            box-shadow: none;
             user-select: none;
             -webkit-user-select: none;
             touch-action: manipulation;
@@ -323,17 +323,17 @@ export const Layout = (props: {
         }
 
         .tab-btn.active {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: #fff;
+            background: transparent;
+            border-color: transparent;
+            color: var(--primary);
         }
 
         .tab-btn.empty {
-            color: var(--text-tertiary);
+            color: #ffffff;
         }
 
         .tab-btn.config {
-            color: var(--text-primary);
+            color: #ffffff;
         }
 
         .tab-icon {
@@ -361,10 +361,6 @@ export const Layout = (props: {
             text-overflow: ellipsis;
             min-height: 0.78rem;
             padding: 0 0.15rem;
-        }
-
-        .tab-btn.empty .tab-title {
-            color: transparent;
         }
 
         .tab-name-dialog-overlay {
@@ -650,7 +646,7 @@ export const Layout = (props: {
         }
 
         .search-form input::placeholder {
-            color: var(--text-tertiary);
+            color: #ffffff;
         }
 
         .suggestions-container {
@@ -1130,13 +1126,13 @@ export const Layout = (props: {
             ` : ''}
             ${props.tabSlots ? html`
                 <div id="tab-bar" class="tab-bar">
-                    ${props.tabSlots.map((slot) => html`
+                    ${props.tabSlots.map((slot, position) => html`
                         <button
                             type="button"
                             class="tab-btn ${slot.active ? 'active' : ''} ${slot.listId ? '' : 'empty'}"
                             data-tab-index="${slot.index}"
                             data-list-id="${slot.listId || ''}"
-                            data-list-name="${slot.name || ''}"
+                            data-list-name="${slot.name || (position === 0 ? 'Home' : `List ${position + 1}`)}"
                         >
                             <span class="tab-icon" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1145,17 +1141,17 @@ export const Layout = (props: {
                                     <path d="M4 17h10"></path>
                                 </svg>
                             </span>
-                            <span class="tab-title">${slot.name || ''}</span>
+                            <span class="tab-title">${slot.name || (position === 0 ? 'Home' : `List ${position + 1}`)}</span>
                         </button>
                     `)}
-                    <button type="button" class="tab-btn config" aria-label="${t(props.locale, 'Configuration', 'Konfiguration')}">
+                    <button type="button" class="tab-btn config" aria-label="${t(props.locale, 'Settings', 'Einstellungen')}">
                         <span class="tab-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="3"></circle>
                                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 15 19.4a1.65 1.65 0 0 0-1 .6 1.65 1.65 0 0 0-.33 1.82 2 2 0 1 1-3.34 0A1.65 1.65 0 0 0 10 20a1.65 1.65 0 0 0-1-.6 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-.6-1 1.65 1.65 0 0 0-1.82-.33 2 2 0 1 1 0-3.34A1.65 1.65 0 0 0 4 10c.24-.38.44-.79.6-1.23A1.65 1.65 0 0 0 4.27 7l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6c.4-.16.82-.36 1.23-.6A1.65 1.65 0 0 0 11 2.18a2 2 0 1 1 2 0A1.65 1.65 0 0 0 13.77 4c.41.24.83.44 1.23.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.16.4.36.82.6 1.23a1.65 1.65 0 0 0 1.82.33 2 2 0 1 1 0 3.34A1.65 1.65 0 0 0 20 14c-.24.38-.44.79-.6 1.23z"></path>
                             </svg>
                         </span>
-                        <span class="tab-title">${t(props.locale, 'Config', 'Config')}</span>
+                        <span class="tab-title">${t(props.locale, 'Settings', 'Einstellungen')}</span>
                     </button>
                 </div>
             ` : ''}
@@ -1972,6 +1968,9 @@ export const Layout = (props: {
 
                 let pressTimer;
                 let longPressTriggered = false;
+                let touchStartX = 0;
+                let touchStartY = 0;
+                let hasMovedTooFar = false;
 
                 const clearPressTimer = () => {
                     if (pressTimer) {
@@ -1980,13 +1979,37 @@ export const Layout = (props: {
                     }
                 };
 
-                const startPress = () => {
+                const startPress = (event) => {
                     longPressTriggered = false;
+                    hasMovedTooFar = false;
                     clearPressTimer();
+
+                    if (event.touches && event.touches.length > 0) {
+                        touchStartX = event.touches[0].clientX;
+                        touchStartY = event.touches[0].clientY;
+                    }
+
                     pressTimer = setTimeout(async () => {
-                        longPressTriggered = true;
-                        await saveTabName(button);
+                        if (!hasMovedTooFar) {
+                            longPressTriggered = true;
+                            await saveTabName(button);
+                        }
                     }, 600);
+                };
+
+                const handleMove = (event) => {
+                    if (!pressTimer) return;
+
+                    if (event.touches && event.touches.length > 0) {
+                        const touch = event.touches[0];
+                        const deltaX = Math.abs(touch.clientX - touchStartX);
+                        const deltaY = Math.abs(touch.clientY - touchStartY);
+
+                        if (deltaX > 10 || deltaY > 10) {
+                            hasMovedTooFar = true;
+                            clearPressTimer();
+                        }
+                    }
                 };
 
                 const endPress = async () => {
@@ -2011,6 +2034,7 @@ export const Layout = (props: {
 
                 button.addEventListener('mousedown', startPress);
                 button.addEventListener('touchstart', startPress, { passive: true });
+                button.addEventListener('touchmove', handleMove, { passive: true });
                 button.addEventListener('mouseup', endPress);
                 button.addEventListener('touchend', endPress);
                 button.addEventListener('mouseleave', clearPressTimer);

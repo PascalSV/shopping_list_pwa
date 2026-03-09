@@ -90,9 +90,9 @@ test('items added after rename are reflected on second device', async ({ browser
     await pageA.locator('form button[type="submit"]').first().click();
     await expect(pageA.locator('#scrolling-title')).toHaveText('Home');
 
-    await pageA.locator('#search-input').fill('Chicken');
+    await pageA.locator('#search-input').fill('Hähnchen');
     await pageA.locator('#search-input').press('Enter');
-    await expect(pageA.locator('.item').filter({ hasText: 'Chicken' })).toBeVisible();
+    await expect(pageA.locator('.item').filter({ hasText: 'Hähnchen' })).toBeVisible();
 
     await pageA.locator('#search-input').fill('Rice');
     await pageA.locator('#search-input').press('Enter');
@@ -100,7 +100,7 @@ test('items added after rename are reflected on second device', async ({ browser
 
     await pageB.goto('/list/' + listId);
     await expect(pageB.locator('#scrolling-title')).toHaveText('Home', { timeout: 10000 });
-    await expect(pageB.locator('.item').filter({ hasText: 'Chicken' })).toBeVisible({ timeout: 10000 });
+    await expect(pageB.locator('.item').filter({ hasText: 'Hähnchen' })).toBeVisible({ timeout: 10000 });
     await expect(pageB.locator('.item').filter({ hasText: 'Rice' })).toBeVisible({ timeout: 10000 });
 
     await contextA.close();

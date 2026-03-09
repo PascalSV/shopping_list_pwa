@@ -8,7 +8,7 @@ export async function getList(db: D1Database, listId: string): Promise<ShoppingL
 }
 
 export async function getAllLists(db: D1Database): Promise<ShoppingList[]> {
-    const result = await db.prepare('SELECT * FROM lists ORDER BY updated_at DESC').all();
+    const result = await db.prepare('SELECT * FROM lists ORDER BY created_at ASC').all();
     return (result.results || []) as unknown as ShoppingList[];
 }
 

@@ -57,7 +57,7 @@ test('long press on item opens edit dialog', async ({ browser, request }) => {
     const itemName = 'Test Item';
     await page.locator('#search-input').fill(itemName);
     await page.locator('#search-input').press('Enter');
-    
+
     const itemLocator = page.locator('.item').filter({ hasText: itemName });
     await expect(itemLocator).toBeVisible();
 
@@ -70,7 +70,7 @@ test('long press on item opens edit dialog', async ({ browser, request }) => {
     // Simulate a long press using touchscreen
     const x = box.x + box.width / 2;
     const y = box.y + box.height / 2;
-    
+
     // Touch down and hold
     await page.mouse.move(x, y);
     await page.mouse.down();
@@ -100,7 +100,7 @@ test('long press on item with touchstart/touchend opens edit dialog', async ({ b
     const itemName = 'Touch Test Item';
     await page.locator('#search-input').fill(itemName);
     await page.locator('#search-input').press('Enter');
-    
+
     const itemLocator = page.locator('.item').filter({ hasText: itemName });
     await expect(itemLocator).toBeVisible();
 
@@ -176,7 +176,7 @@ test('quick tap on item deletes it (not long press)', async ({ browser, request 
     const itemName = 'Quick Tap Item';
     await page.locator('#search-input').fill(itemName);
     await page.locator('#search-input').press('Enter');
-    
+
     const itemLocator = page.locator('.item').filter({ hasText: itemName });
     await expect(itemLocator).toBeVisible();
 
