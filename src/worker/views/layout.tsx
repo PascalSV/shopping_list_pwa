@@ -270,7 +270,7 @@ export const Layout = (props: {
             margin: 0 auto;
             width: 100%;
             flex-shrink: 0;
-            padding-top: 0.65rem;
+            padding-top: 0.5rem;
             padding-right: calc(0.65rem + env(safe-area-inset-right));
             padding-bottom: calc(0.65rem + env(safe-area-inset-bottom));
             padding-left: calc(0.65rem + env(safe-area-inset-left));

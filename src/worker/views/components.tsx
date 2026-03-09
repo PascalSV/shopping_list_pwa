@@ -192,7 +192,7 @@ export const EditListForm = (props: {
                     class="btn btn-danger"
                     hx-delete="/api/lists/${props.listId}"
                     hx-swap="none"
-                    hx-confirm="${t(props.locale, 'Permanently delete this list? This cannot be undone.', 'Diese Liste endgueltig loeschen? Das kann nicht rueckgaengig gemacht werden.')}"
+                    hx-confirm="${t(props.locale, 'Permanently delete this list? This cannot be undone.', 'Diese Liste endgültig löschen? Das kann nicht rückgängig gemacht werden.')}"
                     hx-on::after-settle="window.location.href = '/'"
                 >
                     ${t(props.locale, 'Delete', 'Loeschen')}
@@ -258,7 +258,7 @@ export const EditItemForm = (props: {
                     hx-swap="none"
                     hx-on::after-settle="if(event.detail.xhr.status === 200) { document.querySelector('.form-container')?.remove(); window.location.href = '/list/${props.listId}'; }"
                 >
-                    ${t(props.locale, 'Delete', 'Loeschen')}
+                    ${t(props.locale, 'Delete', 'Löschen')}
                 </button>
             </div>
             <button
