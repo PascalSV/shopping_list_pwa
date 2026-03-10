@@ -984,7 +984,7 @@ export const Layout = (props: {
             cursor: pointer;
             transition: all 0.2s ease;
             white-space: nowrap;
-            box-shadow: var(--shadow-sm);
+            box-shadow: inset 0 -4px 0 var(--primary), var(--shadow-sm);
         }
 
         .suggestion-btn:active {
