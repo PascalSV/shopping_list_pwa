@@ -393,6 +393,11 @@ export const Layout = (props: {
             box-shadow: none;
         }
 
+        .container.keyboard-open .footer {
+            padding-top: 0.2rem;
+            padding-bottom: calc(0.2rem + env(safe-area-inset-bottom));
+        }
+
         .tab-bar {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
