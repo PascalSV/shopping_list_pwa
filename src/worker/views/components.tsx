@@ -103,7 +103,7 @@ export const ListView = (props: {
         <h2 id="scrolling-title" class="scrolling-list-title" data-list-id="${props.listId}">${props.listName}</h2>
         <span id="current-list-title" data-list-id="${props.listId}" style="display: none;">${props.listName}</span>
 
-        ${props.items.length === 0 ? html`<div id="empty-message" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1rem; color: var(--text-secondary); text-align: center;">${t(props.locale, 'You have no more items to shop - well done!', 'Du hast keine Eintraege mehr auf der Liste - gut gemacht!')}</div>` : ''}
+        ${props.items.length === 0 ? html`<div id="empty-message" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1rem; color: var(--text-secondary); text-align: center;">${t(props.locale, 'You have no more items to shop - well done!', 'Du hast keine Einträge mehr auf der Liste - gut gemacht!')}</div>` : ''}
 
         <div id="items-list" class="items-list">
             ${props.items.map(item => ListItemRow(item, props.listId))}
@@ -301,6 +301,68 @@ export const SearchForm = (props: {
         </button>
     </form>
     <div id="suggestions-container" class="suggestions-container"></div>
+`;
+
+export const SettingsView = (props: {
+    locale: Locale;
+}) => html`
+    <div class="settings-view">
+        <h2 class="settings-title">${t(props.locale, 'Settings', 'Einstellungen')}</h2>
+        <p class="settings-subtitle">${t(props.locale, 'Configure how the app behaves on this device.', 'Konfiguriere, wie sich die App auf diesem Gerät verhält.')}</p>
+
+        <div class="settings-list">
+            <div class="setting-row">
+                <div class="setting-meta">
+                    <span class="setting-label">${t(props.locale, 'Theme mode', 'Designmodus')}</span>
+                    <span class="setting-description">${t(props.locale, 'Choose light, dark, or follow your system setting.', 'Wähle hell, dunkel oder folge der Systemeinstellung.')}</span>
+                </div>
+                <div class="setting-control">
+                    <div id="theme-mode-dropdown" class="setting-dropdown">
+                        <button
+                            type="button"
+                            id="theme-mode-trigger"
+                            class="setting-select-trigger"
+                            aria-haspopup="listbox"
+                            aria-expanded="false"
+                            aria-label="${t(props.locale, 'Theme mode', 'Designmodus')}"
+                        >
+                            <span id="theme-mode-trigger-label">${t(props.locale, 'System', 'System')}</span>
+                            <span class="setting-select-caret" aria-hidden="true">▾</span>
+                        </button>
+                        <div
+                            id="theme-mode-menu"
+                            class="setting-select-menu"
+                            role="listbox"
+                            aria-label="${t(props.locale, 'Theme mode options', 'Designmodus Optionen')}"
+                            hidden
+                        >
+                            <button type="button" class="setting-select-option" role="option" data-theme-mode-option="system" data-theme-mode-label="${t(props.locale, 'System', 'System')}">${t(props.locale, 'System', 'System')}</button>
+                            <button type="button" class="setting-select-option" role="option" data-theme-mode-option="light" data-theme-mode-label="${t(props.locale, 'Light', 'Hell')}">${t(props.locale, 'Light', 'Hell')}</button>
+                            <button type="button" class="setting-select-option" role="option" data-theme-mode-option="dark" data-theme-mode-label="${t(props.locale, 'Dark', 'Dunkel')}">${t(props.locale, 'Dark', 'Dunkel')}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-meta">
+                    <span class="setting-label">${t(props.locale, 'Keep screen awake', 'Bildschirm aktiv halten')}</span>
+                    <span class="setting-description">${t(props.locale, 'Prevents the screen from dimming while using the app.', 'Verhindert, dass der Bildschirm bei Nutzung der App abgedunkelt wird.')}</span>
+                </div>
+                <div class="setting-control">
+                    <button
+                        type="button"
+                        id="wake-lock-toggle"
+                        class="setting-toggle"
+                        aria-pressed="true"
+                        aria-label="${t(props.locale, 'Toggle wake lock', 'Wake Lock umschalten')}"
+                    >
+                        <span id="wake-lock-toggle-label">${t(props.locale, 'On', 'An')}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 `;
 
 

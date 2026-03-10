@@ -15,6 +15,7 @@ export const Layout = (props: {
         active: boolean;
     }>;
     currentListId?: string;
+    settingsActive?: boolean;
     children: HtmlEscapedString;
 }) => html`<!DOCTYPE html>
 <html lang="${props.locale}">
@@ -22,7 +23,7 @@ export const Layout = (props: {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#FF6969" />
-    <meta name="description" content="${t(props.locale, 'Pascals Shopping List: Offline-first shopping list PWA', 'Pascals Einkaufsliste: Offline-faehige Einkaufsliste als PWA')}" />
+    <meta name="description" content="${t(props.locale, 'Pascals Shopping List: Offline-first shopping list PWA', 'Pascals Einkaufsliste: Offline-fähige Einkaufsliste als PWA')}" />
     <meta name="application-name" content="${t(props.locale, 'Pascals Shopping List', 'Pascals Einkaufsliste')}" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -34,6 +35,20 @@ export const Layout = (props: {
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <link rel="stylesheet" href="/fonts/fonts.css" />
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script>
+        (() => {
+            try {
+                const storedMode = localStorage.getItem('shopping-theme-mode');
+                if (storedMode === 'light' || storedMode === 'dark') {
+                    document.documentElement.setAttribute('data-theme', storedMode);
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                }
+            } catch (err) {
+                console.error('Failed to read theme mode:', err);
+            }
+        })();
+    </script>
     <style>
         :root {
             --primary: #FF6969;
@@ -89,6 +104,68 @@ export const Layout = (props: {
                 color: var(--text-primary);
                 border-color: #444444;
             }
+        }
+
+        :root[data-theme='light'] {
+            color-scheme: light;
+            --primary: #FF6969;
+            --secondary: #CCCCCC;
+            --error: #F44336;
+            --warning: #FF9800;
+            --success: #4CAF50;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F5F5F5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --text-tertiary: #999999;
+            --border: #E0E0E0;
+            --border-strong: #E0E0E0;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.14);
+            --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        :root[data-theme='light'] .inline-error-banner {
+            background: #FFEBEE;
+            color: #c62828;
+        }
+
+        :root[data-theme='light'] .suggestion-btn {
+            background: var(--text-secondary);
+            color: white;
+            border-color: var(--text-secondary);
+        }
+
+        :root[data-theme='dark'] {
+            color-scheme: dark;
+            --primary: #FF6969;
+            --secondary: #2E2E2E;
+            --error: #FF6B6B;
+            --warning: #FFB74D;
+            --success: #66BB6A;
+            --bg-primary: #181818;
+            --bg-secondary: #101010;
+            --text-primary: #F5F5F5;
+            --text-secondary: #C2C2C2;
+            --text-tertiary: #8E8E8E;
+            --border: #2A2A2A;
+            --border-strong: #3A3A3A;
+            --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
+            --shadow-md: 0 6px 14px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.45);
+            --shadow-xl: 0 16px 28px rgba(0, 0, 0, 0.5);
+        }
+
+        :root[data-theme='dark'] .inline-error-banner {
+            background: #3A1F23;
+            color: #FFB3B3;
+        }
+
+        :root[data-theme='dark'] .suggestion-btn {
+            background: #3A3A3A;
+            color: var(--text-primary);
+            border-color: #444444;
         }
 
         * {
@@ -302,7 +379,7 @@ export const Layout = (props: {
         .tab-btn {
             border: none;
             background: transparent;
-            color: #ffffff;
+            color: var(--text-secondary);
             border-radius: var(--radius-lg);
             min-height: 58px;
             padding: 0.35rem 0.2rem 0.3rem;
@@ -329,11 +406,15 @@ export const Layout = (props: {
         }
 
         .tab-btn.empty {
-            color: #ffffff;
+            color: var(--text-secondary);
         }
 
         .tab-btn.config {
-            color: #ffffff;
+            color: var(--text-secondary);
+        }
+
+        .tab-btn.config.active {
+            color: var(--primary);
         }
 
         .tab-icon {
@@ -405,6 +486,179 @@ export const Layout = (props: {
 
         .tab-name-dialog .form-actions {
             margin-top: 1rem;
+        }
+
+        .settings-view {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .settings-title {
+            margin: 0;
+            font-size: 1.65rem;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .settings-subtitle {
+            margin: 0.5rem 0 1.1rem 0;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .settings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 0.95rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            background: var(--bg-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .setting-row-placeholder {
+            opacity: 0.8;
+        }
+
+        .setting-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            min-width: 0;
+        }
+
+        .setting-label {
+            font-family: 'D-DIN', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .setting-description {
+            font-size: 0.86rem;
+            color: var(--text-secondary);
+        }
+
+        .setting-control {
+            width: 160px;
+            flex-shrink: 0;
+        }
+
+        .setting-dropdown {
+            position: relative;
+            width: 100%;
+        }
+
+        .setting-select-trigger {
+            width: 100%;
+            min-height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 0.3rem 0.7rem;
+            font-size: 0.92rem;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .setting-select-caret {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            transition: transform 0.15s ease;
+        }
+
+        .setting-dropdown.open .setting-select-caret {
+            transform: rotate(180deg);
+        }
+
+        .setting-select-menu {
+            position: absolute;
+            top: calc(100% + 0.35rem);
+            left: 0;
+            right: 0;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            z-index: 140;
+            overflow: hidden;
+        }
+
+        .setting-select-menu[hidden] {
+            display: none;
+        }
+
+        .setting-select-option {
+            width: 100%;
+            border: none;
+            background: transparent;
+            color: var(--text-primary);
+            text-align: left;
+            padding: 0.55rem 0.7rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .setting-select-option + .setting-select-option {
+            border-top: 1px solid var(--border);
+        }
+
+        .setting-select-option.active {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        .setting-select-option:active {
+            opacity: 0.88;
+        }
+
+        .setting-toggle {
+            width: 100%;
+            min-height: 38px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .setting-toggle.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #ffffff;
+        }
+
+        .setting-toggle:active {
+            opacity: 0.88;
+        }
+
+        .setting-placeholder-tag {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 54px;
+            min-height: 28px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 0.76rem;
+            font-weight: 700;
         }
 
         /* Items List */
@@ -938,6 +1192,15 @@ export const Layout = (props: {
                 margin-bottom: 0.5rem;
                 padding: 0.62rem 0.85rem;
             }
+
+            .setting-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .setting-control {
+                width: 100%;
+            }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -1144,7 +1407,7 @@ export const Layout = (props: {
                             <span class="tab-title">${slot.name || (position === 0 ? 'Home' : `List ${position + 1}`)}</span>
                         </button>
                     `)}
-                    <button type="button" class="tab-btn config" aria-label="${t(props.locale, 'Settings', 'Einstellungen')}">
+                    <button type="button" class="tab-btn config ${props.settingsActive ? 'active' : ''}" aria-label="${t(props.locale, 'Settings', 'Einstellungen')}">
                         <span class="tab-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="3"></circle>
@@ -1161,7 +1424,7 @@ export const Layout = (props: {
     <div id="tab-name-dialog" class="tab-name-dialog-overlay" aria-hidden="true">
         <div class="tab-name-dialog" role="dialog" aria-modal="true" aria-labelledby="tab-name-dialog-title">
             <h2 id="tab-name-dialog-title">${t(props.locale, 'Edit list name', 'Listenname bearbeiten')}</h2>
-            <p id="tab-name-dialog-description">${t(props.locale, 'Choose a clear name for this tab.', 'Waehle einen klaren Namen fuer diesen Tab.')}</p>
+            <p id="tab-name-dialog-description">${t(props.locale, 'Choose a clear name for this tab.', 'Wähle einen klaren Namen für diesen Tab.')}</p>
             <div class="form-group">
                 <label for="tab-name-input">${t(props.locale, 'List name', 'Listenname')}</label>
                 <input id="tab-name-input" type="text" maxlength="80" autocomplete="off" />
@@ -1177,6 +1440,163 @@ export const Layout = (props: {
         (() => {
         const isGerman = (document.documentElement.lang || '').toLowerCase().startsWith('de');
         const tr = (de, en) => (isGerman ? de : en);
+        const THEME_MODE_KEY = 'shopping-theme-mode';
+        const WAKE_LOCK_ENABLED_KEY = 'shopping-wake-lock-enabled';
+
+        let wakeLockSentinel = null;
+
+        const getStoredThemeMode = () => {
+            try {
+                const stored = localStorage.getItem(THEME_MODE_KEY);
+                if (stored === 'light' || stored === 'dark' || stored === 'system') {
+                    return stored;
+                }
+            } catch (err) {
+                console.error('Failed to read stored theme mode:', err);
+            }
+
+            return 'system';
+        };
+
+        const applyThemeMode = (mode) => {
+            const selectedMode = mode === 'light' || mode === 'dark' ? mode : 'system';
+
+            if (selectedMode === 'system') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', selectedMode);
+            }
+
+            try {
+                localStorage.setItem(THEME_MODE_KEY, selectedMode);
+            } catch (err) {
+                console.error('Failed to persist theme mode:', err);
+            }
+
+            const triggerLabel = document.getElementById('theme-mode-trigger-label');
+            const modeOptions = document.querySelectorAll('.setting-select-option[data-theme-mode-option]');
+            modeOptions.forEach((option) => {
+                const optionMode = option.dataset.themeModeOption || 'system';
+                const isActive = optionMode === selectedMode;
+                option.classList.toggle('active', isActive);
+                option.setAttribute('aria-selected', isActive ? 'true' : 'false');
+
+                if (isActive && triggerLabel) {
+                    triggerLabel.textContent = option.dataset.themeModeLabel || option.textContent || '';
+                }
+            });
+        };
+
+        const isWakeLockSupported = () => {
+            return 'wakeLock' in navigator && navigator.wakeLock && typeof navigator.wakeLock.request === 'function';
+        };
+
+        const getStoredWakeLockEnabled = () => {
+            try {
+                const stored = localStorage.getItem(WAKE_LOCK_ENABLED_KEY);
+                if (stored === 'true') {
+                    return true;
+                }
+                if (stored === 'false') {
+                    return false;
+                }
+            } catch (err) {
+                console.error('Failed to read wake lock preference:', err);
+            }
+
+            return true;
+        };
+
+        const storeWakeLockEnabled = (enabled) => {
+            try {
+                localStorage.setItem(WAKE_LOCK_ENABLED_KEY, enabled ? 'true' : 'false');
+            } catch (err) {
+                console.error('Failed to persist wake lock preference:', err);
+            }
+        };
+
+        const updateWakeLockToggleUi = (enabled) => {
+            const wakeLockToggle = document.getElementById('wake-lock-toggle');
+            const wakeLockToggleLabel = document.getElementById('wake-lock-toggle-label');
+
+            if (!wakeLockToggle || !wakeLockToggleLabel) {
+                return;
+            }
+
+            wakeLockToggle.classList.toggle('active', enabled);
+            wakeLockToggle.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+            wakeLockToggleLabel.textContent = enabled ? tr('An', 'On') : tr('Aus', 'Off');
+        };
+
+        const releaseScreenWakeLock = async () => {
+            if (wakeLockSentinel && !wakeLockSentinel.released) {
+                try {
+                    await wakeLockSentinel.release();
+                } catch (err) {
+                    console.error('Failed to release wake lock:', err);
+                }
+            }
+
+            wakeLockSentinel = null;
+        };
+
+        const requestScreenWakeLock = async () => {
+            if (!isWakeLockSupported()) {
+                return;
+            }
+
+            if (!getStoredWakeLockEnabled()) {
+                return;
+            }
+
+            if (document.visibilityState !== 'visible') {
+                return;
+            }
+
+            if (wakeLockSentinel && !wakeLockSentinel.released) {
+                return;
+            }
+
+            try {
+                wakeLockSentinel = await navigator.wakeLock.request('screen');
+                wakeLockSentinel.addEventListener('release', () => {
+                    wakeLockSentinel = null;
+                });
+            } catch (err) {
+                console.error('Failed to request wake lock:', err);
+            }
+        };
+
+        const syncWakeLockState = async () => {
+            const enabled = getStoredWakeLockEnabled();
+            updateWakeLockToggleUi(enabled);
+
+            if (enabled) {
+                await requestScreenWakeLock();
+            } else {
+                await releaseScreenWakeLock();
+            }
+        };
+
+        const initializeWakeLockLifecycle = () => {
+            if (window.wakeLockLifecycleBound === true) {
+                return;
+            }
+
+            window.wakeLockLifecycleBound = true;
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    void syncWakeLockState();
+                } else {
+                    void releaseScreenWakeLock();
+                }
+            });
+
+            window.addEventListener('pagehide', () => {
+                void releaseScreenWakeLock();
+            });
+        };
 
         // === Offline Queue System ===
         // Only initialize once per session to avoid redeclaration errors
@@ -1294,7 +1714,7 @@ export const Layout = (props: {
 
                 // Reload the page to show updated data
                 if (failedOperations.length < queue.length) {
-                    showNotification(tr('Offline-Aenderungen erfolgreich synchronisiert', 'Offline changes synced successfully'), 'success');
+                    showNotification(tr('Offline-Änderungen erfolgreich synchronisiert', 'Offline changes synced successfully'), 'success');
                     setTimeout(() => {
                         window.location.reload();
                     }, 1000);
@@ -1356,7 +1776,7 @@ export const Layout = (props: {
                     });
 
                     console.log('Queued failed offline', verb + ':', path);
-                    showNotification(tr('Aenderungen lokal gespeichert und werden online synchronisiert', 'Changes saved locally and will sync when online'), 'info');
+                    showNotification(tr('Änderungen lokal gespeichert und werden online synchronisiert', 'Changes saved locally and will sync when online'), 'info');
                     
                     // Store the update locally for immediate UI feedback
                     if (path.includes('/lists/') && parameters && parameters.name) {
@@ -1373,7 +1793,7 @@ export const Layout = (props: {
                     });
 
                     console.log('Queued failed offline POST:', path);
-                    showNotification(tr('Aenderungen lokal gespeichert und werden online synchronisiert', 'Changes saved locally and will sync when online'), 'info');
+                    showNotification(tr('Änderungen lokal gespeichert und werden online synchronisiert', 'Changes saved locally and will sync when online'), 'info');
                 }
             });
 
@@ -1555,7 +1975,7 @@ export const Layout = (props: {
                             if (!emptyMessage) {
                                 const listView = itemsList.closest('.list-view');
                                 if (listView) {
-                                    listView.insertAdjacentHTML('afterbegin', '<div id="empty-message" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1rem; color: var(--text-secondary); text-align: center;">' + tr('Du hast keine Eintraege mehr auf der Liste - gut gemacht!', 'You have no more items to shop - well done!') + '</div>');
+                                    listView.insertAdjacentHTML('afterbegin', '<div id="empty-message" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1rem; color: var(--text-secondary); text-align: center;">' + tr('Du hast keine Einträge mehr auf der Liste - gut gemacht!', 'You have no more items to shop - well done!') + '</div>');
                                 }
                             }
                         } else if (emptyMessage) {
@@ -1895,6 +2315,95 @@ export const Layout = (props: {
 
         const tabNameDialogController = createTabNameDialogController();
 
+        const initializeSettingsPageInteractions = () => {
+            const dropdown = document.getElementById('theme-mode-dropdown');
+            const trigger = document.getElementById('theme-mode-trigger');
+            const menu = document.getElementById('theme-mode-menu');
+            const options = document.querySelectorAll('.setting-select-option[data-theme-mode-option]');
+            const wakeLockToggle = document.getElementById('wake-lock-toggle');
+
+            if (dropdown && trigger && menu && trigger.dataset.bound !== 'true') {
+                trigger.dataset.bound = 'true';
+                applyThemeMode(getStoredThemeMode());
+
+                const closeMenu = () => {
+                    menu.hidden = true;
+                    trigger.setAttribute('aria-expanded', 'false');
+                    dropdown.classList.remove('open');
+                };
+
+                const openMenu = () => {
+                    menu.hidden = false;
+                    trigger.setAttribute('aria-expanded', 'true');
+                    dropdown.classList.add('open');
+                };
+
+                trigger.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (menu.hidden) {
+                        openMenu();
+                    } else {
+                        closeMenu();
+                    }
+                });
+
+                trigger.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowDown') {
+                        event.preventDefault();
+                        openMenu();
+                    }
+                });
+
+                options.forEach((option) => {
+                    option.addEventListener('click', () => {
+                        applyThemeMode(option.dataset.themeModeOption || 'system');
+                        closeMenu();
+                    });
+                });
+
+                document.addEventListener('click', (event) => {
+                    const target = event.target;
+                    if (!dropdown.contains(target)) {
+                        closeMenu();
+                    }
+                });
+
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape') {
+                        closeMenu();
+                    }
+                });
+            }
+
+            if (wakeLockToggle && wakeLockToggle.dataset.bound !== 'true') {
+                wakeLockToggle.dataset.bound = 'true';
+
+                wakeLockToggle.addEventListener('click', () => {
+                    const enabled = !getStoredWakeLockEnabled();
+                    storeWakeLockEnabled(enabled);
+                    updateWakeLockToggleUi(enabled);
+                    void syncWakeLockState();
+                });
+            }
+
+            updateWakeLockToggleUi(getStoredWakeLockEnabled());
+        };
+
+        const initializeSettingsTabInteractions = () => {
+            const settingsButton = document.querySelector('.tab-btn.config');
+            if (!settingsButton || settingsButton.dataset.settingsBound === 'true') {
+                return;
+            }
+
+            settingsButton.dataset.settingsBound = 'true';
+
+            settingsButton.addEventListener('click', (event) => {
+                event.preventDefault();
+                window.location.href = '/settings';
+            });
+        };
+
         const initializeTabBarInteractions = () => {
             const tabButtons = document.querySelectorAll('.tab-btn[data-tab-index]');
 
@@ -2022,7 +2531,7 @@ export const Layout = (props: {
                     if (!listId) {
                         if (window.showNotification) {
                             window.showNotification(
-                                tr('Lange druecken, um einen Namen zu vergeben', 'Long press to name this tab'),
+                                tr('Lange drücken, um einen Namen zu vergeben', 'Long press to name this tab'),
                                 'info'
                             );
                         }
@@ -2102,17 +2611,24 @@ export const Layout = (props: {
         } // Close search block
 
         document.addEventListener('DOMContentLoaded', () => {
+            applyThemeMode(getStoredThemeMode());
+            initializeWakeLockLifecycle();
+            void syncWakeLockState();
+            initializeSettingsPageInteractions();
             initializeAllItems();
             initializeAllListRows();
             initializeListToolbar();
             initializeTabBarInteractions();
+            initializeSettingsTabInteractions();
         });
 
         htmx.on('htmx:afterSwap', () => {
+            initializeSettingsPageInteractions();
             initializeAllItems();
             initializeAllListRows();
             initializeListToolbar();
             initializeTabBarInteractions();
+            initializeSettingsTabInteractions();
         });
 
         htmx.on('htmx:afterRequest', (event) => {

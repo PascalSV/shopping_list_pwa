@@ -9,7 +9,7 @@ import { adminRoutes } from './routes/admin';
 import * as db from './db';
 import { resolveLocale, t } from './i18n';
 import { Layout } from './views/layout';
-import { ListView, CreateListForm, EditListForm, EditItemForm, EmptyTabView, LoginForm } from './views/components';
+import { ListView, CreateListForm, EditListForm, EditItemForm, EmptyTabView, LoginForm, SettingsView } from './views/components';
 
 const app = new Hono<HonoContext>();
 
@@ -222,6 +222,28 @@ app.get('/', async (c) => {
 
 app.get('/lists', async (c) => {
     return c.redirect('/', 302);
+});
+
+app.get('/settings', async (c) => {
+    const locale = resolveLocale(c.req.header('Accept-Language'));
+    try {
+        const lists = await db.getAllLists(c.env.DB);
+        const tabSlots = buildTabSlots(lists);
+
+        return c.html(
+            Layout({
+                title: t(locale, 'Settings', 'Einstellungen'),
+                locale,
+                lists,
+                tabSlots,
+                settingsActive: true,
+                children: SettingsView({ locale })
+            })
+        );
+    } catch (err) {
+        console.error('Error loading settings page:', err);
+        return c.text(t(locale, 'Error loading settings', 'Fehler beim Laden der Einstellungen'), 500);
+    }
 });
 
 app.get('/list/create', async (c) => {

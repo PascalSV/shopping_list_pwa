@@ -14,7 +14,7 @@ itemsRoutes.get('/lists/:listId/items', async (c) => {
         return c.json(items);
     } catch (err) {
         console.error('Error fetching items:', err);
-        return c.json({ error: t(locale, 'Failed to fetch items', 'Eintraege konnten nicht geladen werden') }, 500);
+        return c.json({ error: t(locale, 'Failed to fetch items', 'Einträge konnten nicht geladen werden') }, 500);
     }
 });
 
