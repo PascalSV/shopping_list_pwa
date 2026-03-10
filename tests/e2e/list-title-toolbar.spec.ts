@@ -32,7 +32,7 @@ async function createListViaApi(page: Page, listName: string): Promise<string> {
     return body.id;
 }
 
-test('toolbar title appears early and scrolling title never overlays toolbar', async ({ browser }) => {
+test('list title is fixed in header and not part of scrollable content', async ({ browser }) => {
     test.setTimeout(90000);
 
     const context = await browser.newContext({
@@ -49,7 +49,25 @@ test('toolbar title appears early and scrolling title never overlays toolbar', a
     await page.goto('/list/' + listId);
 
     await expect(page.locator('#scrolling-title')).toHaveText(listName);
-    await expect(page.locator('#toolbar-title')).toBeHidden();
+
+    const titleInToolbar = await page.evaluate(() => {
+        const title = document.getElementById('scrolling-title');
+        return Boolean(title && title.closest('#list-toolbar'));
+    });
+    expect(titleInToolbar).toBe(true);
+
+    const titleInContent = await page.evaluate(() => {
+        const content = document.getElementById('content');
+        const title = document.getElementById('scrolling-title');
+        return Boolean(content && title && content.contains(title));
+    });
+    expect(titleInContent).toBe(false);
+
+    const initialTitleTop = await page.evaluate(() => {
+        const title = document.getElementById('scrolling-title');
+        return title ? Math.round(title.getBoundingClientRect().top) : null;
+    });
+    expect(initialTitleTop).not.toBeNull();
 
     const searchInput = page.locator('#search-input');
     for (let i = 1; i <= 14; i += 1) {
@@ -60,49 +78,21 @@ test('toolbar title appears early and scrolling title never overlays toolbar', a
         await page.waitForTimeout(120);
     }
 
-    // Scroll enough to make the scrolling title go above the visible content area
     await page.locator('#content').evaluate((el: HTMLElement) => {
-        el.scrollTop = 160;
+        el.scrollTop = 260;
     });
     await page.waitForTimeout(150);
 
-    await expect(page.locator('#toolbar-title')).toBeVisible();
+    await expect(page.locator('#scrolling-title')).toBeVisible();
 
-    const largeTitleScrolledAway = await page.evaluate(() => {
-        const content = document.getElementById('content');
-        const scrollingTitle = document.getElementById('scrolling-title');
-
-        if (!content || !scrollingTitle) {
-            return false;
-        }
-
-        const contentTop = content.getBoundingClientRect().top;
-        const titleRect = scrollingTitle.getBoundingClientRect();
-        return titleRect.bottom <= contentTop + 10;
+    const afterScrollTitleTop = await page.evaluate(() => {
+        const title = document.getElementById('scrolling-title');
+        return title ? Math.round(title.getBoundingClientRect().top) : null;
     });
+    expect(afterScrollTitleTop).not.toBeNull();
 
-    expect(largeTitleScrolledAway).toBe(true);
-
-    await page.locator('#content').evaluate((el: HTMLElement) => {
-        el.scrollTop += 160;
-    });
-    await page.waitForTimeout(120);
-
-    const titleBleedsIntoToolbar = await page.evaluate(() => {
-        const toolbar = document.getElementById('list-toolbar');
-        if (!toolbar) {
-            return false;
-        }
-
-        const r = toolbar.getBoundingClientRect();
-        const x = Math.min(window.innerWidth - 2, Math.max(2, r.left + 24));
-        const yInsideToolbar = Math.min(window.innerHeight - 2, Math.max(2, r.top + 4));
-
-        const hit = document.elementFromPoint(x, yInsideToolbar);
-        return Boolean(hit && hit.closest('#scrolling-title'));
-    });
-
-    expect(titleBleedsIntoToolbar).toBe(false);
+    const topDelta = Math.abs((afterScrollTitleTop ?? 0) - (initialTitleTop ?? 0));
+    expect(topDelta).toBeLessThanOrEqual(2);
 
     await context.close();
 });

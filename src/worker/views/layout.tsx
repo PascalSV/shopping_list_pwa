@@ -57,6 +57,7 @@ export const Layout = (props: {
             --warning: #FF9800;
             --success: #4CAF50;
             --bg-primary: #FFFFFF;
+            --bg-primary-rgb: 255, 255, 255;
             --bg-secondary: #F5F5F5;
             --text-primary: #1a1a1a;
             --text-secondary: #666666;
@@ -82,6 +83,7 @@ export const Layout = (props: {
                 --warning: #FFB74D;
                 --success: #66BB6A;
                 --bg-primary: #181818;
+                --bg-primary-rgb: 24, 24, 24;
                 --bg-secondary: #101010;
                 --text-primary: #F5F5F5;
                 --text-secondary: #C2C2C2;
@@ -114,6 +116,7 @@ export const Layout = (props: {
             --warning: #FF9800;
             --success: #4CAF50;
             --bg-primary: #FFFFFF;
+            --bg-primary-rgb: 255, 255, 255;
             --bg-secondary: #F5F5F5;
             --text-primary: #1a1a1a;
             --text-secondary: #666666;
@@ -145,6 +148,7 @@ export const Layout = (props: {
             --warning: #FFB74D;
             --success: #66BB6A;
             --bg-primary: #181818;
+            --bg-primary-rgb: 24, 24, 24;
             --bg-secondary: #101010;
             --text-primary: #F5F5F5;
             --text-secondary: #C2C2C2;
@@ -212,12 +216,32 @@ export const Layout = (props: {
         .header {
             background: var(--bg-primary);
             color: var(--text-primary);
-            padding: 0.5rem 1.5rem;
+            padding: 0.45rem 1.5rem 0.35rem;
             box-shadow: var(--shadow-sm);
             border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
             z-index: 100;
+        }
+
+        .header .list-title {
+            line-height: 1;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -18px;
+            height: 18px;
+            pointer-events: none;
+            background: linear-gradient(
+                to bottom,
+                rgba(var(--bg-primary-rgb), 0.96) 0%,
+                rgba(var(--bg-primary-rgb), 0.72) 42%,
+                rgba(var(--bg-primary-rgb), 0) 100%
+            );
         }
 
         .header h1 {
@@ -1168,7 +1192,7 @@ export const Layout = (props: {
             }
 
             .header {
-                padding: 1rem;
+                padding: 0.55rem 1rem 0.42rem;
             }
 
             .header h1 {
@@ -1373,7 +1397,7 @@ export const Layout = (props: {
         ${props.currentListId ? html`
         <div class="header">
             <div id="list-toolbar" class="list-toolbar">
-                <h2 id="toolbar-title" class="list-title" style="display: none;" data-list-id="${props.currentListId}">${props.title}</h2>
+                <h2 id="scrolling-title" class="list-title" data-list-id="${props.currentListId}">${props.title}</h2>
             </div>
         </div>
         ` : ''}
