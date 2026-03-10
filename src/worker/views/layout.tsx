@@ -398,6 +398,19 @@ export const Layout = (props: {
             grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 0.4rem;
             margin-top: 0.55rem;
+            max-height: 96px;
+            overflow: hidden;
+            opacity: 1;
+            transform: translateY(0);
+            transition: max-height 0.18s ease, opacity 0.16s ease, transform 0.16s ease, margin-top 0.16s ease;
+        }
+
+        .container.keyboard-open .tab-bar {
+            max-height: 0;
+            opacity: 0;
+            transform: translateY(8px);
+            margin-top: 0;
+            pointer-events: none;
         }
 
         .tab-btn {
@@ -919,8 +932,8 @@ export const Layout = (props: {
 
         .search-form input:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(255, 105, 105, 0.2);
+            border-color: var(--border);
+            box-shadow: none;
         }
 
         .search-form input::placeholder {
@@ -2576,6 +2589,70 @@ export const Layout = (props: {
             });
         };
 
+        const initializeSearchKeyboardInteractions = () => {
+            const searchInput = document.getElementById('search-input');
+            const container = document.querySelector('.container.has-search');
+
+            if (!searchInput || !container || searchInput.dataset.keyboardBound === 'true') {
+                return;
+            }
+
+            searchInput.dataset.keyboardBound = 'true';
+
+            let baselineViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
+            const isMobileSizedViewport = () => window.innerWidth <= 640;
+
+            const setKeyboardOpen = (isOpen) => {
+                container.classList.toggle('keyboard-open', isOpen && isMobileSizedViewport());
+            };
+
+            const updateBaselineViewportHeight = () => {
+                if (document.activeElement !== searchInput) {
+                    baselineViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+                }
+            };
+
+            const syncKeyboardState = () => {
+                if (document.activeElement !== searchInput) {
+                    setKeyboardOpen(false);
+                    updateBaselineViewportHeight();
+                    return;
+                }
+
+                if (!isMobileSizedViewport()) {
+                    setKeyboardOpen(false);
+                    return;
+                }
+
+                const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+                const keyboardLikelyOpen = baselineViewportHeight - viewportHeight > 120;
+                const fallbackFocusBehavior = !window.visualViewport;
+
+                setKeyboardOpen(keyboardLikelyOpen || fallbackFocusBehavior);
+            };
+
+            searchInput.addEventListener('focus', () => {
+                baselineViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+                setKeyboardOpen(isMobileSizedViewport());
+            });
+
+            searchInput.addEventListener('blur', () => {
+                window.setTimeout(() => {
+                    syncKeyboardState();
+                }, 120);
+            });
+
+            if (window.visualViewport && window.visualViewport.addEventListener) {
+                window.visualViewport.addEventListener('resize', syncKeyboardState);
+            }
+
+            window.addEventListener('resize', () => {
+                updateBaselineViewportHeight();
+                syncKeyboardState();
+            });
+        };
+
         // Search and autocomplete functionality
         {
             const searchInput = document.getElementById('search-input');
@@ -2639,6 +2716,7 @@ export const Layout = (props: {
             initializeWakeLockLifecycle();
             void syncWakeLockState();
             initializeSettingsPageInteractions();
+            initializeSearchKeyboardInteractions();
             initializeAllItems();
             initializeAllListRows();
             initializeListToolbar();
@@ -2648,6 +2726,7 @@ export const Layout = (props: {
 
         htmx.on('htmx:afterSwap', () => {
             initializeSettingsPageInteractions();
+            initializeSearchKeyboardInteractions();
             initializeAllItems();
             initializeAllListRows();
             initializeListToolbar();
