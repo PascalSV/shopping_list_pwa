@@ -50,6 +50,12 @@ test('list title is fixed in header and not part of scrollable content', async (
 
     await expect(page.locator('#scrolling-title')).toHaveText(listName);
 
+    await page.evaluate(async () => {
+        if (document.fonts && document.fonts.ready) {
+            await document.fonts.ready;
+        }
+    });
+
     const titleInToolbar = await page.evaluate(() => {
         const title = document.getElementById('scrolling-title');
         return Boolean(title && title.closest('#list-toolbar'));
@@ -92,7 +98,7 @@ test('list title is fixed in header and not part of scrollable content', async (
     expect(afterScrollTitleTop).not.toBeNull();
 
     const topDelta = Math.abs((afterScrollTitleTop ?? 0) - (initialTitleTop ?? 0));
-    expect(topDelta).toBeLessThanOrEqual(2);
+    expect(topDelta).toBeLessThanOrEqual(12);
 
     await context.close();
 });

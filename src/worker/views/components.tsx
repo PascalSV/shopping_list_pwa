@@ -233,7 +233,6 @@ export const EditItemForm = (props: {
                     name="name" 
                     required 
                     value="${props.name}"
-                    autofocus
                 />
             </div>
             <div class="form-group">
@@ -244,8 +243,23 @@ export const EditItemForm = (props: {
                     name="remark" 
                     value="${props.remark || ''}"
                     placeholder="${t(props.locale, 'Optional note', 'Optionale Notiz')}"
+                    autofocus
                 />
             </div>
+            <script>
+                window.setTimeout(() => {
+                    const remarkInput = document.getElementById('itemRemark');
+                    if (!remarkInput) {
+                        return;
+                    }
+
+                    remarkInput.focus();
+                    const valueLength = remarkInput.value ? remarkInput.value.length : 0;
+                    if (typeof remarkInput.setSelectionRange === 'function') {
+                        remarkInput.setSelectionRange(valueLength, valueLength);
+                    }
+                }, 0);
+            </script>
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">
                     ${t(props.locale, 'Update', 'Aktualisieren')}
