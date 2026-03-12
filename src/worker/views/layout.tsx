@@ -1484,8 +1484,37 @@ export const Layout = (props: {
         const tr = (de, en) => (isGerman ? de : en);
         const THEME_MODE_KEY = 'shopping-theme-mode';
         const WAKE_LOCK_ENABLED_KEY = 'shopping-wake-lock-enabled';
+        const WAKE_LOCK_RETRY_DELAY_MS = 2500;
+        const WAKE_LOCK_WATCHDOG_INTERVAL_MS = 30000;
 
         let wakeLockSentinel = null;
+        let wakeLockRetryTimer = null;
+
+        const clearWakeLockRetry = () => {
+            if (wakeLockRetryTimer) {
+                window.clearTimeout(wakeLockRetryTimer);
+                wakeLockRetryTimer = null;
+            }
+        };
+
+        const scheduleWakeLockRetry = () => {
+            if (!getStoredWakeLockEnabled()) {
+                return;
+            }
+
+            if (document.visibilityState !== 'visible') {
+                return;
+            }
+
+            if (wakeLockRetryTimer) {
+                return;
+            }
+
+            wakeLockRetryTimer = window.setTimeout(() => {
+                wakeLockRetryTimer = null;
+                void syncWakeLockState();
+            }, WAKE_LOCK_RETRY_DELAY_MS);
+        };
 
         const getStoredThemeMode = () => {
             try {
@@ -1571,6 +1600,8 @@ export const Layout = (props: {
         };
 
         const releaseScreenWakeLock = async () => {
+            clearWakeLockRetry();
+
             if (wakeLockSentinel && !wakeLockSentinel.released) {
                 try {
                     await wakeLockSentinel.release();
@@ -1603,9 +1634,11 @@ export const Layout = (props: {
                 wakeLockSentinel = await navigator.wakeLock.request('screen');
                 wakeLockSentinel.addEventListener('release', () => {
                     wakeLockSentinel = null;
+                    scheduleWakeLockRetry();
                 });
             } catch (err) {
                 console.error('Failed to request wake lock:', err);
+                scheduleWakeLockRetry();
             }
         };
 
@@ -1635,9 +1668,25 @@ export const Layout = (props: {
                 }
             });
 
+            window.addEventListener('focus', () => {
+                void syncWakeLockState();
+            });
+
+            window.addEventListener('pageshow', () => {
+                void syncWakeLockState();
+            });
+
             window.addEventListener('pagehide', () => {
                 void releaseScreenWakeLock();
             });
+
+            window.setInterval(() => {
+                if (document.visibilityState !== 'visible') {
+                    return;
+                }
+
+                void syncWakeLockState();
+            }, WAKE_LOCK_WATCHDOG_INTERVAL_MS);
         };
 
         // === Offline Queue System ===
