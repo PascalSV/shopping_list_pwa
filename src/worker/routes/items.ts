@@ -123,7 +123,8 @@ itemsRoutes.patch('/lists/:listId/items/:itemId', async (c) => {
         } else {
             const formData = await c.req.formData();
             name = (formData.get('name') as string) || undefined;
-            remark = (formData.get('remark') as string) || undefined;
+            const remarkValue = formData.get('remark');
+            remark = remarkValue === null ? undefined : String(remarkValue);
             position = (formData.get('position') as string) || undefined;
         }
 
