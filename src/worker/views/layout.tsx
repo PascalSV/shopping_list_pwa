@@ -22,7 +22,7 @@ export const Layout = (props: {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#FF6969" />
+    <meta name="theme-color" content="#c95555" />
     <meta name="description" content="${t(props.locale, 'Pascals Shopping List: Offline-first shopping list PWA', 'Pascals Einkaufsliste: Offline-fähige Einkaufsliste als PWA')}" />
     <meta name="application-name" content="${t(props.locale, 'Pascals Shopping List', 'Pascals Einkaufsliste')}" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -39,6 +39,7 @@ export const Layout = (props: {
         (() => {
             try {
                 const storedMode = localStorage.getItem('shopping-theme-mode');
+
                 if (storedMode === 'light' || storedMode === 'dark') {
                     document.documentElement.setAttribute('data-theme', storedMode);
                 } else {
@@ -72,6 +73,16 @@ export const Layout = (props: {
             --radius-md: 0.5rem;
             --radius-lg: 0.75rem;
             --radius-xl: 1rem;
+            --font-ui: 'SF Pro Display', 'D-DIN', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-heading: 'D-DIN', sans-serif;
+            --font-item: 'D-DIN Condensed', sans-serif;
+            --app-bg-accent: radial-gradient(120% 90% at 0% 0%, rgba(255, 160, 160, 0.17) 0%, rgba(255, 160, 160, 0) 56%);
+            --container-surface: var(--bg-primary);
+            --container-border: var(--border);
+            --container-shadow: var(--shadow-md);
+            --item-fill: linear-gradient(90deg, #c95555 0%, #ee8f8f 100%);
+            --item-fill-completed: linear-gradient(90deg, #b84c4c 0%, #dc7e7e 100%);
+            --item-remark-color: rgba(255, 255, 255, 0.95);
         }
 
         @media (prefers-color-scheme: dark) {
@@ -179,8 +190,10 @@ export const Layout = (props: {
         }
 
         body {
-            font-family: 'SF Pro Display', 'D-DIN', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: var(--font-ui);
             background: var(--bg-secondary);
+            background-image: var(--app-bg-accent);
+            background-attachment: fixed;
             color: var(--text-primary);
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
@@ -202,10 +215,10 @@ export const Layout = (props: {
             min-height: 100vh;
             height: 100dvh;
             max-height: 100dvh;
-            background: var(--bg-primary);
-            border-left: 1px solid var(--border);
-            border-right: 1px solid var(--border);
-            box-shadow: var(--shadow-md);
+            background: var(--container-surface);
+            border-left: 1px solid var(--container-border);
+            border-right: 1px solid var(--container-border);
+            box-shadow: var(--container-shadow);
             position: relative;
             z-index: 1;
             overflow: hidden;
@@ -245,7 +258,7 @@ export const Layout = (props: {
         }
 
         .header h1 {
-            font-family: 'D-DIN', sans-serif;
+            font-family: var(--font-heading);
             font-size: 1.75rem;
             font-weight: 700;
             display: flex;
@@ -257,7 +270,7 @@ export const Layout = (props: {
         }
 
         h2, h3, h4, h5, h6 {
-            font-family: 'D-DIN', sans-serif;
+            font-family: var(--font-heading);
             font-weight: 700;
         }
 
@@ -283,7 +296,7 @@ export const Layout = (props: {
         }
 
         .btn {
-            font-family: 'D-DIN', sans-serif;
+            font-family: var(--font-heading);
             padding: 0.45rem 0.85rem;
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
@@ -536,6 +549,7 @@ export const Layout = (props: {
         }
 
         .settings-title {
+            font-family: var(--font-heading);
             margin: 0;
             font-size: 1.65rem;
             color: var(--text-primary);
@@ -578,7 +592,7 @@ export const Layout = (props: {
         }
 
         .setting-label {
-            font-family: 'D-DIN', sans-serif;
+            font-family: var(--font-heading);
             font-size: 1rem;
             font-weight: 700;
             color: var(--text-primary);
@@ -754,6 +768,7 @@ export const Layout = (props: {
         }
 
         .list-title {
+            font-family: var(--font-heading);
             font-size: 1.75rem;
             font-weight: 700;
             color: var(--text-primary);
@@ -778,6 +793,7 @@ export const Layout = (props: {
         }
 
         .scrolling-list-title {
+            font-family: var(--font-heading);
             font-size: 1.75rem;
             font-weight: 700;
             color: var(--text-primary);
@@ -790,7 +806,7 @@ export const Layout = (props: {
             display: flex;
             gap: 0.75rem;
             padding: 0.85rem 1rem;
-            background: var(--primary);
+            background: var(--item-fill);
             border-radius: 0;
             align-items: center;
             box-shadow: var(--shadow-sm);
@@ -838,13 +854,13 @@ export const Layout = (props: {
         }
 
         .item.completed {
-            background: var(--primary);
+            background: var(--item-fill-completed);
             opacity: 0.75;
         }
 
         .item-name {
             flex: 0 0 auto;
-            font-family: 'D-DIN Condensed', sans-serif;
+            font-family: var(--font-item);
             font-size: 1.06rem;
             font-weight: 600;
             color: white;
@@ -852,7 +868,7 @@ export const Layout = (props: {
 
         .item-remark {
             font-size: 0.92rem;
-            color: rgba(255, 255, 255, 0.95);
+            color: var(--item-remark-color);
             display: block;
             width: 100%;
             overflow: hidden;

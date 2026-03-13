@@ -5,8 +5,8 @@
     "start_url": "/",
     "display": "standalone",
     "orientation": "portrait-primary",
-    "background_color": "#FF6969",
-    "theme_color": "#FF6969",
+    "background_color": "#c95555",
+    "theme_color": "#c95555",
     "categories": [
         "productivity",
         "lifestyle"
