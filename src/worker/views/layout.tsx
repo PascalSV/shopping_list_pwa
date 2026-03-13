@@ -710,6 +710,23 @@ export const Layout = (props: {
             gap: 0.2rem;
         }
 
+        .undo-delete-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 0.8rem;
+        }
+
+        .undo-delete-container[hidden] {
+            display: none !important;
+        }
+
+        .undo-delete-btn {
+            width: 100%;
+            max-width: 440px;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
         /* List View */
         .list-view {
             position: relative;
@@ -1484,16 +1501,26 @@ export const Layout = (props: {
         const tr = (de, en) => (isGerman ? de : en);
         const THEME_MODE_KEY = 'shopping-theme-mode';
         const WAKE_LOCK_ENABLED_KEY = 'shopping-wake-lock-enabled';
+        const UNDO_DELETE_VISIBLE_MS = 30000;
         const WAKE_LOCK_RETRY_DELAY_MS = 2500;
         const WAKE_LOCK_WATCHDOG_INTERVAL_MS = 30000;
 
         let wakeLockSentinel = null;
         let wakeLockRetryTimer = null;
+        let lastDeletedItemForUndo = null;
+        let undoDeleteTimer = null;
 
         const clearWakeLockRetry = () => {
             if (wakeLockRetryTimer) {
                 window.clearTimeout(wakeLockRetryTimer);
                 wakeLockRetryTimer = null;
+            }
+        };
+
+        const clearUndoDeleteTimer = () => {
+            if (undoDeleteTimer) {
+                window.clearTimeout(undoDeleteTimer);
+                undoDeleteTimer = null;
             }
         };
 
@@ -2094,6 +2121,95 @@ export const Layout = (props: {
             emptyMessage.style.display = itemCount === 0 ? 'block' : 'none';
         };
 
+        const updateUndoDeleteUi = () => {
+            const undoContainer = document.getElementById('undo-delete-container');
+            const undoButton = document.getElementById('undo-delete-btn');
+            const currentTitle = document.getElementById('current-list-title');
+            const currentListId = currentTitle ? currentTitle.getAttribute('data-list-id') : null;
+
+            if (!undoContainer || !undoButton) {
+                return;
+            }
+
+            const canUndo = Boolean(lastDeletedItemForUndo && currentListId && lastDeletedItemForUndo.listId === currentListId);
+            undoContainer.hidden = !canUndo;
+            undoButton.disabled = !canUndo;
+        };
+
+        const clearUndoDeleteState = () => {
+            clearUndoDeleteTimer();
+            lastDeletedItemForUndo = null;
+            updateUndoDeleteUi();
+        };
+
+        const scheduleUndoDeleteAutoClear = () => {
+            clearUndoDeleteTimer();
+            undoDeleteTimer = window.setTimeout(() => {
+                clearUndoDeleteState();
+            }, UNDO_DELETE_VISIBLE_MS);
+        };
+
+        const storeUndoDeleteState = (item) => {
+            if (!item) {
+                return;
+            }
+
+            const itemName = item.getAttribute('data-item-name') || item.querySelector('.item-name')?.textContent?.trim() || '';
+            const listId = item.getAttribute('data-list-id') || '';
+            const remark = item.querySelector('.item-remark')?.textContent?.trim() || '';
+
+            if (!itemName || !listId) {
+                return;
+            }
+
+            lastDeletedItemForUndo = {
+                listId,
+                name: itemName,
+                remark
+            };
+
+            updateUndoDeleteUi();
+            scheduleUndoDeleteAutoClear();
+        };
+
+        const initializeUndoDeleteControls = () => {
+            const undoButton = document.getElementById('undo-delete-btn');
+            if (!undoButton) {
+                return;
+            }
+
+            if (undoButton.dataset.bound !== 'true') {
+                undoButton.dataset.bound = 'true';
+                undoButton.addEventListener('click', () => {
+                    if (!lastDeletedItemForUndo) {
+                        return;
+                    }
+
+                    const undoData = {
+                        listId: lastDeletedItemForUndo.listId,
+                        name: lastDeletedItemForUndo.name,
+                        remark: lastDeletedItemForUndo.remark || ''
+                    };
+
+                    clearUndoDeleteState();
+
+                    htmx.ajax('POST', '/api/lists/' + undoData.listId + '/items', {
+                        source: undoButton,
+                        target: '#items-list',
+                        swap: 'beforeend',
+                        values: {
+                            name: undoData.name,
+                            remark: undoData.remark
+                        }
+                    });
+
+                    window.setTimeout(updateEmptyState, 120);
+                });
+            }
+
+            updateUndoDeleteUi();
+        };
+
         const initializeListToolbar = () => {
             const toolbar = document.getElementById('list-toolbar');
             const toolbarTitle = document.getElementById('toolbar-title');
@@ -2204,6 +2320,8 @@ export const Layout = (props: {
                 const itemId = item.dataset.itemId;
                 const listId = item.dataset.listId;
                 const deleteUrl = '/api/lists/' + listId + '/items/' + itemId;
+
+                storeUndoDeleteState(item);
 
                 // Optimistic update: immediately mark item as being deleted
                 if (!navigator.onLine) {
@@ -2771,6 +2889,7 @@ export const Layout = (props: {
             void syncWakeLockState();
             initializeSettingsPageInteractions();
             initializeSearchKeyboardInteractions();
+            initializeUndoDeleteControls();
             initializeAllItems();
             initializeAllListRows();
             initializeListToolbar();
@@ -2781,6 +2900,7 @@ export const Layout = (props: {
         htmx.on('htmx:afterSwap', () => {
             initializeSettingsPageInteractions();
             initializeSearchKeyboardInteractions();
+            initializeUndoDeleteControls();
             initializeAllItems();
             initializeAllListRows();
             initializeListToolbar();

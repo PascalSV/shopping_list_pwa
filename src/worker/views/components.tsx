@@ -102,10 +102,14 @@ export const ListView = (props: {
     <div class="list-view">
         <span id="current-list-title" data-list-id="${props.listId}" style="display: none;">${props.listName}</span>
 
-        ${props.items.length === 0 ? html`<div id="empty-message" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1rem; color: var(--text-secondary); text-align: center;">${t(props.locale, 'You have no more items to shop - well done!', 'Du hast keine Einträge mehr auf der Liste - gut gemacht!')}</div>` : ''}
-
         <div id="items-list" class="items-list">
             ${props.items.map(item => ListItemRow(item, props.listId))}
+        </div>
+
+        <div id="undo-delete-container" class="undo-delete-container" hidden>
+            <button id="undo-delete-btn" type="button" class="btn btn-secondary undo-delete-btn">
+                ${t(props.locale, 'Undo last removed item', 'Letzten entfernten Eintrag wiederherstellen')}
+            </button>
         </div>
     </div>
 `;

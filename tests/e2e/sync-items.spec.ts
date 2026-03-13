@@ -97,3 +97,31 @@ test('item delete is reflected on second device UI', async ({ browser, request }
     await contextA.close();
     await contextB.close();
 });
+
+test('deleted item can be restored via undo button', async ({ browser, request }) => {
+    test.setTimeout(60000);
+    await cleanupLists(request);
+
+    const context = await createAuthedContext(browser);
+    const page = await context.newPage();
+
+    await page.goto('/');
+
+    const listId = await createListViaApi(page, 'Undo List');
+    await page.goto('/list/' + listId);
+    await expect(page.locator('#scrolling-title')).toHaveText('Undo List');
+
+    await page.locator('#search-input').fill('Paprika');
+    await page.locator('#search-input').press('Enter');
+    await expect(page.locator('.item').filter({ hasText: 'Paprika' })).toBeVisible();
+
+    await page.locator('.item').filter({ hasText: 'Paprika' }).first().click();
+    await expect(page.locator('.item').filter({ hasText: 'Paprika' })).not.toBeVisible({ timeout: 10000 });
+    await expect(page.locator('#items-list + #undo-delete-container')).toBeVisible();
+
+    await page.locator('#undo-delete-btn').click();
+    await expect(page.locator('.item').filter({ hasText: 'Paprika' })).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('#undo-delete-container')).toBeHidden();
+
+    await context.close();
+});
