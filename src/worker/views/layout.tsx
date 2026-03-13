@@ -60,6 +60,7 @@ export const Layout = (props: {
             --bg-primary: #FFFFFF;
             --bg-primary-rgb: 255, 255, 255;
             --bg-secondary: #F5F5F5;
+            --bg-secondary-rgb: 245, 245, 245;
             --text-primary: #1a1a1a;
             --text-secondary: #666666;
             --text-tertiary: #999999;
@@ -96,6 +97,7 @@ export const Layout = (props: {
                 --bg-primary: #181818;
                 --bg-primary-rgb: 24, 24, 24;
                 --bg-secondary: #101010;
+                --bg-secondary-rgb: 16, 16, 16;
                 --text-primary: #F5F5F5;
                 --text-secondary: #C2C2C2;
                 --text-tertiary: #8E8E8E;
@@ -129,6 +131,7 @@ export const Layout = (props: {
             --bg-primary: #FFFFFF;
             --bg-primary-rgb: 255, 255, 255;
             --bg-secondary: #F5F5F5;
+            --bg-secondary-rgb: 245, 245, 245;
             --text-primary: #1a1a1a;
             --text-secondary: #666666;
             --text-tertiary: #999999;
@@ -161,6 +164,7 @@ export const Layout = (props: {
             --bg-primary: #181818;
             --bg-primary-rgb: 24, 24, 24;
             --bg-secondary: #101010;
+            --bg-secondary-rgb: 16, 16, 16;
             --text-primary: #F5F5F5;
             --text-secondary: #C2C2C2;
             --text-tertiary: #8E8E8E;
@@ -394,6 +398,22 @@ export const Layout = (props: {
             border-top: none;
             box-shadow: none;
             z-index: 50;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -18px;
+            height: 18px;
+            pointer-events: none;
+            background: linear-gradient(
+                to top,
+                rgba(var(--bg-secondary-rgb), 0.96) 0%,
+                rgba(var(--bg-secondary-rgb), 0.72) 42%,
+                rgba(var(--bg-secondary-rgb), 0) 100%
+            );
         }
 
         .footer:empty {
